@@ -33,8 +33,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "ll_stdhdr.hpp"
-#include "dirscan.hpp"
 
+#include <regex>
+typedef std::vector<std::regex> PatternList;
 
 //-------------------------------------------------------------------------------------------------
 class ParseUtil {
