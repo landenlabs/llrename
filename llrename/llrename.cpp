@@ -63,7 +63,6 @@ typedef std::vector<lstring> StringList;
 
 // Runtime options
 static ParseUtil parser;
-static StringList parsedDirList;
 
 const size_t MAX_PATH  = __DARWIN_MAXPATHLEN;
 
@@ -330,7 +329,8 @@ void showHelp(const char* arg0) {
 int main(int argc, char* argv[]) {
     
     Dirscan dirscan(HandleDir, HandleFile);
-
+    StringList extraDirList;
+    
     if (argc == 1) {
         showHelp(argv[0]);
         return 0;
@@ -453,12 +453,12 @@ int main(int argc, char* argv[]) {
                 }
             } else {
                 // Collect extra arguments for scanning below.
-                parsedDirList.push_back(argv[argn]);
+                extraDirList.push_back(argv[argn]);
             }
         }
 
         if (parser.patternErrCnt == 0 && parser.optionErrCnt == 0) {
-            for (auto const& filePath : parsedDirList)  {
+            for (auto const& filePath : extraDirList)  {
                 dirscan.FindFiles(filePath, 0);
             }
 
