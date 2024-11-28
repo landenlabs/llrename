@@ -86,6 +86,10 @@ static lstring subregTo;
 static bool haveSubReg = false;
 static bool doDirectories = false;
 
+static lstring logPrefix = "";
+static lstring logSep = ", ";
+static lstring logEndl = "\n";
+
 static fstream inListStream;
 static lstring inListPath;
 static fstream outListStream;
@@ -227,12 +231,13 @@ static bool doRename(const lstring& filepath, const lstring& filename) {
     getNewFile(newFile, dirWithSlash, oldFile, num);
 
     if (outListStream) {
-        lstring qOldFile = quote(dirWithSlash + filename, 0);
-        lstring qNewFile = quote(newFile, 0);
+        unsigned strOffset = fullPath ? 0 : CWD_LEN;
+        lstring qOldFile = quote((dirWithSlash + filename) + strOffset, 0);
+        lstring qNewFile = quote(newFile + strOffset, 0);
         if (invert)
-            outListStream << qNewFile << "," << qOldFile << endl;
+            outListStream << logPrefix << qNewFile << logSep << qOldFile << logEndl;
         else
-            outListStream << qOldFile << "," << qNewFile << endl;
+            outListStream << logPrefix << qOldFile << logSep << qNewFile << logEndl;
     }
 
     if (showFile)
@@ -277,25 +282,29 @@ void showHelp(const char* arg0) {
         "   -_y_excludeFile=<filePattern>   ; Exclude files by regex match \n"
         "   -_y_IncludePath=<pathPattern>   ; Include path by regex match \n"
         "   -_y_ExcludePath=<pathPattern>   ; Exclude path by regex match \n"
-        "   -_y_toList=<write_fileName>     ; Output List of 'old','new' \n"
-        "   -_y_fromList=<read_fileName>    ; Read List rename pair per line \n"
-    
         "   -_y_D                           ; Rename directory \n"
         "   -_y_c/C                         ; lowercase or Uppercase \n"
         "   -_y_sub=<regexp>                ; substitude regexpression \n"
         "                                      /fromRexex/toRegex/ \n"
         "   -_y_parts=<fileParts>           ; See fileParts note below\n"
         "   -_y_startNum=1000               ; Start number, def=1 \n"
+        "   -_y_no                          ; No rename, dry run \n"
+        "\n"
+        "   -_y_toList=<write_fileName>     ; Output List of 'old','new' \n"
+        "   -_y_fromList=<read_fileName>    ; Read List rename pair per line \n"
+        " _P_Used with -fromList _X_ \n"
         "   -_y_1       [default]           ; Rename 'old' to 'new' \n"
         "   -_y_2                           ; Rename 'new' to 'old' \n"
-        "   -_y_no                          ; No rename, just log \n"
-        "   -_y_full                        ; Ful path, default is relative \n"
-        "   -_y_smartQuote                  ; Only add quotes if spaces \n"
+        "   -_y_full                        ; Log full path, default is relative \n"
+        "   -_y_smartQuote                  ; Only add quotes if spaces in path \n"
+        "   -_y_logStart=\"foo.csh \"       ; Log prefix string, def none \n"
+        "   -_y_logSep=\", \"               ; Log separator string, def=\", \" \n"
+        "   -_y_logEnd=\"\\n\"              ; Log end of line, def=\"\\n\" \n"
         "\n"
         " _p_FileParts:\n"
-        "     N=name, E=extension, #=number \n"
+        "     N=name, E=extension, #=number (note uppercase N and E)\n"
         "     N-#.E \n"
-        "     n_####.E \n"
+        "     N_####.E \n"
         "     N.'foo' \n"
     
         "\n"
@@ -361,6 +370,15 @@ int main(int argc, char* argv[]) {
                         break;
                     case 't':   // -toList=<filepath>
                         parser.validFile(outListStream, std::ios::out, outListPath=value, "tolist", cmdName);
+                        break;
+                    case 'l':
+                        if (parser.validOption("logStart", cmdName, false)) {
+                            logPrefix = ParseUtil::convertSpecialChar(value);
+                        } else if (parser.validOption("logSep", cmdName, false)) {
+                            logSep = ParseUtil::convertSpecialChar(value);
+                        } else if (parser.validOption("logEnd", cmdName, false)) {
+                            logEndl = ParseUtil::convertSpecialChar(value);
+                        }
                         break;
                     case 'p':   // -parts="<format/sector>"
                         if (parser.validOption("parts", cmdName)) {
