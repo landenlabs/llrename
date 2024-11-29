@@ -43,7 +43,7 @@
 
 const char EXTN_CHAR = '.';
 
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef HAVE_WIN
 
 // #include <sys/stat.h>
 // #include <sys/types.h>
