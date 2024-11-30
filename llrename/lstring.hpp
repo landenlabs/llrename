@@ -34,6 +34,7 @@
 
 
 #include <string>
+#include <algorithm>
 
 // Enhanced string class
 class lstring : public std::string {

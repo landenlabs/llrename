@@ -57,14 +57,26 @@
 
 using namespace std;
 
+#ifdef HAVE_WIN
+
+#include <direct.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+
+// #include <Windows.h>
+#define chdir _chdir
+#define getcwd _getcwd
+#else
+const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
+#endif
+
 // Helper types
 typedef unsigned int uint;
 typedef std::vector<lstring> StringList;
 
 // Runtime options
 static ParseUtil parser;
-
-const size_t MAX_PATH  = __DARWIN_MAXPATHLEN;
 
 static char CWD_BUF[MAX_PATH];
 static unsigned CWD_LEN = 0;

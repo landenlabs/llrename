@@ -21,24 +21,27 @@
     <ClCompile Include="..\llrename\llrename.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\llrename\dirscan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\llrename\parseutil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\llrename\directory.h">
+    <ClInclude Include="..\llrename\dirscan.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\llrename\ll_stdhdr.h">
+    <ClInclude Include="..\llrename\parseutil.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\llrename\lstring.h">
+    <ClInclude Include="..\llrename\directory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\llrename\split.h">
+    <ClInclude Include="..\llrename\ll_stdhdr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\llrename\SwapStream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\llrename\json.h">
+    <ClInclude Include="..\llrename\lstring.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

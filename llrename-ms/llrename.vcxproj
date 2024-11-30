@@ -20,15 +20,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\llrename\directory.cpp" />
+    <ClCompile Include="..\llrename\dirscan.cpp" />
     <ClCompile Include="..\llrename\llrename.cpp" />
+    <ClCompile Include="..\llrename\parseutil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\llrename\directory.h" />
-    <ClInclude Include="..\llrename\json.h" />
-    <ClInclude Include="..\llrename\ll_stdhdr.h" />
-    <ClInclude Include="..\llrename\lstring.h" />
-    <ClInclude Include="..\llrename\split.h" />
-    <ClInclude Include="..\llrename\SwapStream.h" />
+    <ClInclude Include="..\llrename\directory.hpp" />
+    <ClInclude Include="..\llrename\dirscan.hpp" />
+    <ClInclude Include="..\llrename\ll_stdhdr.hpp" />
+    <ClInclude Include="..\llrename\lstring.hpp" />
+    <ClInclude Include="..\llrename\parseutil.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -41,26 +42,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>

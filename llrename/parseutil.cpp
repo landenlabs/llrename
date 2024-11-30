@@ -33,11 +33,17 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "parseutil.hpp"
+#include "lstring.hpp"
 
 #include <assert.h>
 #include <iostream>
 #include <fstream>
 #include <regex>
+
+
+#ifdef HAVE_WIN
+#define strncasecmp _strnicmp
+#endif
 
 typedef unsigned int uint;
 
@@ -69,7 +75,7 @@ bool ParseUtil::validOption(const char* validCmd, const char* possibleCmd, bool 
     size_t validLen = strlen(validCmd);
     size_t possibleLen = strlen(possibleCmd);
 
-    if ( strncasecmp(validCmd, possibleCmd, std::min(validLen, possibleLen)) == 0)
+    if (strncasecmp(validCmd, possibleCmd, std::min(validLen, possibleLen)) == 0)
         return true;
 
     if (reportErr) {
