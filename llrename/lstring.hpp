@@ -51,7 +51,7 @@ public:
 
     lstring(const lstring& rhs) : std::string(rhs)
     { }
-    lstring(const lstring&& rhs) : std::string(rhs)
+    lstring(const lstring&& rhs) noexcept  : std::string(rhs)
     { }
 
     lstring(const std::string& rhs) : std::string(rhs)

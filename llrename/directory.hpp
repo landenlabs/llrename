@@ -24,7 +24,7 @@
 // Author: Dennis Lang - 2024
 // https://landenlabs.com
 //
-// This file is part of lldupdir project.
+// This file is part of llrename project.
 //
 // ----- License ----
 //
@@ -137,6 +137,18 @@ public:
     static lstring& getExt(lstring& outExt, const lstring& inPath);
     static bool deleteFile(const char* inPath);
     static bool setPermission(const char* inPath, unsigned permission, bool setAllParts = false);
+
+    static bool makeWriteableFile(const char* filePath, struct stat* info);
+    inline bool isWriteableFile(const struct stat& info) {
+    #ifdef HAVE_WIN
+        size_t mask = _S_IFREG + _S_IWRITE;
+    #else
+        size_t mask = S_IFREG + S_IWRITE;
+    #endif
+        return ((info.st_mode & mask) == mask);
+    }
+
+    static lstring parts(const char* fullpat, bool dir, bool name, bool ext);
 
 private:
     Directory_files(const Directory_files&);
