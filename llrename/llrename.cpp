@@ -76,8 +76,6 @@ typedef unsigned int uint;
 typedef std::vector<lstring> StringList;
 
 // Runtime options
-static ParseUtil parser;
-
 static char CWD_BUF[MAX_PATH];
 static unsigned CWD_LEN = 0;
 const unsigned START_NUM = 1;
@@ -339,7 +337,8 @@ void showHelp(const char* arg0) {
 
 // ---------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
-    
+
+    ParseUtil parser;
     Dirscan dirscan(HandleDir, HandleFile);
     StringList extraDirList;
     

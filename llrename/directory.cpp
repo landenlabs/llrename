@@ -245,7 +245,7 @@ bool Directory_files::makeWriteableFile(const char* filePath, struct stat* info)
     }
 #ifdef HAVE_WIN
     size_t mask = _S_IFREG + _S_IWRITE;
-    return _chmod(filePath, info.st_mode | mask) == 0;
+    return _chmod(filePath, info->st_mode | mask) == 0;
 #else
     size_t mask = S_IFREG + S_IWRITE;
     return chmod(filePath, info->st_mode | mask) == 0;
