@@ -145,8 +145,8 @@ static bool doRenameB(const char* oldName, const char* newName) {
     const char* action = " ";
  
     lstring dir1, dir2;
-    Directory_files::getDir(dir1, oldName);
-    Directory_files::getDir(dir2, newName);
+    DirUtil::getDir(dir1, oldName);
+    DirUtil::getDir(dir2, newName);
     
     if (dir1 == dir2) {
 #ifdef HAVE_WIN
@@ -212,7 +212,7 @@ static const lstring& getNewFile(lstring& outPath, const lstring& dir, lstring& 
         outPath += name;
     } else {
         lstring extn;
-        Directory_files::getExt(extn, name);
+        DirUtil::getExt(extn, name);
         name.resize(name.length() - extn.length() - 1);
         lstring part;
         outPath += ParseUtil::getParts(part, parts, name, extn, num);
@@ -235,7 +235,7 @@ static bool doRename(const lstring& filepath, const lstring& filename) {
         oldFile = regex_replace(oldFile, subregFrom, subregTo);
     }
     
-    Directory_files::getDir(dirWithSlash, filepath);
+    DirUtil::getDir(dirWithSlash, filepath);
     if (!dirWithSlash.empty()) dirWithSlash += Directory_files::SLASH_CHAR;
     getNewFile(newFile, dirWithSlash, oldFile, num);
 
@@ -272,8 +272,8 @@ static bool HandleFile(const lstring& filepath, const lstring& filename) {
 static bool HandleDir(const lstring& filepath) {
     if (doDirectories) {
         lstring dir, name;
-        Directory_files::getDir(dir, filepath);
-        Directory_files::getName(name, filepath);
+        DirUtil::getDir(dir, filepath);
+        DirUtil::getName(name, filepath);
         return doRename(filepath, name);
     }
     return false;

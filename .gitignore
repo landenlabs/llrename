@@ -9,9 +9,7 @@
 
 # Windows VisualStudio
 .ipch/
+x64/
 .vs/
 .obj
 .exe
-x64/
-
-

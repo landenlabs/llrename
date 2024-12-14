@@ -57,7 +57,7 @@ static bool FileMatches(const lstring& inName, const PatternList& patternList, b
 size_t Dirscan::FindFile(const lstring& fullname) {
     size_t fileCount = 0;
     lstring name;
-    Directory_files::getName(name, fullname);
+    DirUtil::getName(name, fullname);
 
     if (! name.empty()
         && ! FileMatches(name, excludeFilePatList, false)

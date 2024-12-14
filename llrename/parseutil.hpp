@@ -34,13 +34,9 @@
 
 #include "ll_stdhdr.hpp"
 
-#ifdef HAVE_WIN
-#include <windows.h>
-#include <stdio.h>
-#endif
-
 #include <regex>
 typedef std::vector<std::regex> PatternList;
+
 
 //-------------------------------------------------------------------------------------------------
 class ParseUtil {
@@ -49,6 +45,9 @@ public:
     unsigned optionErrCnt = 0;
     unsigned patternErrCnt = 0;
     
+    ParseUtil() noexcept ;
+    // ~ParseUtil();
+
     void showUnknown(const char* argStr);
     std::regex getRegEx(const char* value);
  
@@ -57,12 +56,10 @@ public:
  
     bool validFile(fstream& stream, int mode, const lstring& value, const char* validCmd, const char* possibleCmd, bool reportErr = true);
     
-    
-    static
-    const char* convertSpecialChar(const char* inPtr);
-    
-    static
-    lstring& getParts(
+    static bool FileMatches(const lstring& inName, const PatternList& patternList, bool emptyResult);
+    static const char* convertSpecialChar(const char* inPtr);
+    static std::string& fmtDateTime(string& outTmStr, time_t& now);
+    static lstring& getParts(
             lstring& outPart,
             const char* partSelector,
             const char* name,
@@ -117,7 +114,6 @@ public:
     }
 };
 
-
 //-------------------------------------------------------------------------------------------------
 // Replace using regular expression
 inline string& replaceRE(string& inOut, const char* findRE, const char* replaceWith) {
@@ -126,6 +122,12 @@ inline string& replaceRE(string& inOut, const char* findRE, const char* replaceW
     inOut = regex_replace(inOut, pattern, replaceWith, flags);
     return inOut;
 }
+
+#ifdef HAVE_WIN
+#include <windows.h>
+#include <stdio.h>
+#endif
+
 
 class Colors {
 public:
@@ -139,6 +141,7 @@ public:
 #define WHITE  "\033[01;37m"
 #define OFF    "\033[00m"
  
+
     static string colorize(const char* inStr) {
 #ifdef HAVE_WIN
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
