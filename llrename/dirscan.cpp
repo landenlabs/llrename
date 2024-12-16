@@ -34,6 +34,7 @@
 
 
 #include "ll_stdhdr.hpp"
+#include "signals.hpp"
 #include "dirscan.hpp"
 #include "directory.hpp"
 
@@ -90,7 +91,7 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
         cerr << ex.what() << std::endl;
     }
 
-    while (directory.more()) {
+    while (!Signals::aborted && directory.more()) {
         directory.fullName(fullname);
         if (directory.is_directory()) {
             if ((maxDepth == 0 || depth < maxDepth)

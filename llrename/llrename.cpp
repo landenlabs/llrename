@@ -38,6 +38,7 @@
 
 // Project files
 #include "ll_stdhdr.hpp"
+#include "signals.hpp"
 #include "dirscan.hpp"
 #include "directory.hpp"
 #include "parseutil.hpp"
@@ -64,7 +65,6 @@ using namespace std;
 #include <stdlib.h>
 #include <errno.h>
 
-// #include <Windows.h>
 #define chdir _chdir
 #define getcwd _getcwd
 #else
@@ -337,7 +337,7 @@ void showHelp(const char* arg0) {
 
 // ---------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
-
+    Signals::init();
     ParseUtil parser;
     Dirscan dirscan(HandleDir, HandleFile);
     StringList extraDirList;

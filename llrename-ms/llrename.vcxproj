@@ -23,6 +23,7 @@
     <ClCompile Include="..\llrename\dirscan.cpp" />
     <ClCompile Include="..\llrename\llrename.cpp" />
     <ClCompile Include="..\llrename\parseutil.cpp" />
+    <ClCompile Include="..\llrename\signals.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\llrename\directory.hpp" />
@@ -30,6 +31,7 @@
     <ClInclude Include="..\llrename\ll_stdhdr.hpp" />
     <ClInclude Include="..\llrename\lstring.hpp" />
     <ClInclude Include="..\llrename\parseutil.hpp" />
+    <ClInclude Include="..\llrename\signals.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -27,6 +27,9 @@
     <ClCompile Include="..\llrename\parseutil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\llrename\signals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\llrename\dirscan.hpp">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\llrename\lstring.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\llrename\signals.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
