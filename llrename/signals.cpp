@@ -71,7 +71,7 @@ void Signals::init() {
 
 //-------------------------------------------------------------------------------------------------
 void sigHandler(int /* sig_t */ s) {
-    abortFlag = true;
+    Signals::aborted = true;
     std::cerr << "\nCaught signal " << std::endl;
 }
 
