@@ -35,6 +35,9 @@
 #include "ll_stdhdr.hpp"
 
 #include <regex>
+#include <set>
+#include <iostream>
+
 typedef std::vector<std::regex> PatternList;
 
 
@@ -75,6 +78,7 @@ public:
 class Split : public std::vector<lstring> {
 public:
     typedef size_t(*Find_of)(const lstring& str, const char* delimList, size_t begIdx);
+    const bool keepEmpty = true;
 
     Split(const lstring& str, const char* delimList, Find_of find_of) {
         size_t lastPos = 0;
@@ -82,13 +86,13 @@ public:
         size_t pos = (*find_of)(str, delimList, 0);
 
         while (pos != lstring::npos) {
-            if (pos != lastPos)
+            if (keepEmpty || pos != lastPos)
                 push_back(str.substr(lastPos, pos - lastPos));
             lastPos = pos + 1;
             // pos = str.find_first_of(delimList, lastPos);
             pos = (*find_of)(str, delimList, lastPos);
         }
-        if (lastPos < str.length())
+        if (keepEmpty || lastPos < str.length())
             push_back(str.substr(lastPos, pos - lastPos));
     }
 
@@ -101,12 +105,12 @@ public:
         size_t pos = str.find_first_of(delimList);
 
         while (pos != lstring::npos && --maxSplit > 0) {
-            if (pos != lastPos)
+            if (keepEmpty || pos != lastPos)
                 push_back(str.substr(lastPos, pos - lastPos));
             lastPos = pos + 1;
             pos = str.find_first_of(delimList, lastPos);
         }
-        if (lastPos < str.length())
+        if (keepEmpty || lastPos < str.length())
             push_back(str.substr(lastPos, (maxSplit == 0) ? str.length() : pos - lastPos));
     }
 };
@@ -125,5 +129,26 @@ inline string& replaceRE(string& inOut, const char* findRE, const char* replaceW
 class Colors {
 public:
     static string colorize(const char* inStr);
+
+    template <typename... Things>
+    static void cerrArgs(Things... things) {
+        for (const auto p : {things...}) {
+            std::cerr << p << std::endl;
+        }
+    }
+
+    // Requires C++ v17+
+    // Show error in RED
+    template<typename T, typename... Args>
+    static void showError(T first, Args... args) {
+        std::cerr << Colors::colorize("_R_");
+        std::cerr << first;
+// #ifdef HAVE_WIN
+//        cerrArgs(args...);
+// #else
+        ((std::cerr << args << " "), ...);
+// #endif
+        std::cerr << Colors::colorize("_X_\n");
+    }
 };
 

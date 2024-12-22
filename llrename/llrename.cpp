@@ -87,6 +87,7 @@ static bool dryRun = false;
 static bool fullPath = false;
 static bool invert = false;
 static bool smartQuote = false; // only quote if spaces
+static bool force = false;      // delete target if same name
 
 static char casefold = '-';
 static lstring parts;
@@ -129,7 +130,7 @@ static void doChdir(const char* dir) {
         if (verbose)
             std::cerr << "chdir to " << dir << std::endl;
     } else {
-        std::cerr << strerror(errno) << " Failed to change directory to " << dir << endl;
+        Colors::showError(strerror(errno), " Failed to change directory to ", dir);
     }
 }
 
@@ -149,6 +150,9 @@ static bool doRenameB(const char* oldName, const char* newName) {
     DirUtil::getDir(dir2, newName);
     
     if (dir1 == dir2) {
+        if (force && DirUtil::fileExists(newName)) {
+            DirUtil::deleteFile(dryRun, newName);
+        }
 #ifdef HAVE_WIN
         // TODO - test if windows can do absolute file rename.
         code = doRenameC(oldName, newName);  // rename absolute path
@@ -160,12 +164,12 @@ static bool doRenameB(const char* oldName, const char* newName) {
         errMsg = (code == 0) ? "" : strerror(errno);
         action = " rename ";
     } else {
-        cerr << "Something went wrong " << dir1 << std::endl;
+        Colors::showError("Something went wrong, base directory changed ", dir1);
     }
     
 
-    if (verbose)
-        std::cerr << errMsg << action << (oldName+CWD_LEN) << " to " << (newName+CWD_LEN)  << std::endl;
+    if (verbose || code != 0)
+        Colors::showError(errMsg, action, oldName+CWD_LEN, " to ", newName+CWD_LEN);
 
     return (code == 0);
 }
@@ -282,7 +286,7 @@ static bool HandleDir(const lstring& filepath) {
 //-------------------------------------------------------------------------------------------------
 void showHelp(const char* arg0) {
     const char* helpMsg =
-        "  Dennis Lang v2.1 (LandenLabs.com)_X_ " __DATE__ "\n\n"
+        "  Dennis Lang v2.2 (LandenLabs.com)_X_ " __DATE__ "\n\n"
         "\nDes: Renumber file names\n"
         "Use: llrename [options] directories...   or  files\n"
         "\n"
@@ -298,6 +302,7 @@ void showHelp(const char* arg0) {
         "   -_y_parts=<fileParts>           ; See fileParts note below\n"
         "   -_y_startNum=1000               ; Start number, def=1 \n"
         "   -_y_no                          ; No rename, dry run \n"
+        "   -_y_force                       ; Deleted target if same name \n"
         "\n"
         "   -_y_toList=<write_fileName>     ; Output List of 'old','new' \n"
         "   -_y_fromList=<read_fileName>    ; Read List rename pair per line \n"
@@ -330,6 +335,10 @@ void showHelp(const char* arg0) {
         "  llrename -_y_C -_y_start=1000 -_y_part=\"N_####.E\" -_y_inc=\\*.jpg -_y_inc=\\*.png dir1 Foo*.png Bar*.jpg \n"
 #endif
         "  llrename -_y_sub=\"/([^_]+)_([.*])/$2-$1/\" dir1 \n"
+        " _p_Warning with regular expression: \n"
+        "   Remember to escape special characters, such as ., ( and [ \n"
+        "   For example to remove all  \"copy (2) of\" use \n"
+        "   -sub=\"/copy [(][0-9][)] of//\" \n"
         "\n";
     
     std::cerr << Colors::colorize("\n_W_") << arg0 << Colors::colorize(helpMsg);
@@ -403,7 +412,7 @@ int main(int argc, char* argv[]) {
                         } else if (parser.validOption("substitute", cmdName)) {
                             Split parts(value.substr(1), value.substr(0, 1));
                             subregFrom = parser.getRegEx(parts[0]);
-                            subregTo =  parts[1];
+                            subregTo = parts[1];
                             haveSubReg = true;
                         }
                         break;
@@ -435,7 +444,11 @@ int main(int argc, char* argv[]) {
                             
      // ------ special use case
                     case 'f':   // full path
-                        fullPath = parser.validOption("fullpath", cmdName);
+                        if (parser.validOption("fullpath", cmdName, false)) {
+                            fullPath = true;
+                        } else if (parser.validOption("force", cmdName)) {
+                            force = true;
+                        }
                         break;
                     case 's': // SmartQuotes
                         if (parser.validOption("showFiles", cmdName, false)) {
@@ -478,7 +491,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        std::cerr << (doDirectories ? " Directories=" : " Files=") << (num - START_NUM) << " renamed" << std::endl;
+        Colors::showError(doDirectories ? " Directories=" : " Files=", ( num - START_NUM ), " renamed");
     }
 
     return 0;

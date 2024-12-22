@@ -62,7 +62,7 @@ std::regex ParseUtil::getRegEx(const char* value) {
         return std::regex(valueStr);
         // return std::regex(valueStr, regex_constants::icase);
     }  catch (const std::regex_error& regEx)   {
-        std::cerr << Colors::colorize("_R") << regEx.what() << ", Pattern=" << value << Colors::colorize("_X_\n");
+        Colors::showError("Invalid regular expression ", regEx.what(), ", Pattern=", value);
     }
 
     patternErrCnt++;
@@ -111,7 +111,7 @@ bool ParseUtil::validFile(
         stream.open(value, mode);
         int err = errno;
         if (stream.bad()) {
-            std::cerr << Colors::colorize("_R_Failed to open ") << validCmd << " "  << value << " " << strerror(err) <<  Colors::colorize("'_X_\n");
+            Colors::showError("Failed to open ", validCmd, " ", value, " ", strerror(err));
             optionErrCnt++;
         }
     }
