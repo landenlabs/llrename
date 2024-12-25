@@ -286,8 +286,8 @@ static bool HandleDir(const lstring& filepath) {
 //-------------------------------------------------------------------------------------------------
 void showHelp(const char* arg0) {
     const char* helpMsg =
-        "  Dennis Lang v2.2 (LandenLabs.com)_X_ " __DATE__ "\n\n"
-        "\nDes: Renumber file names\n"
+        "  Dennis Lang v2.3 (LandenLabs.com)_X_ " __DATE__ "\n\n"
+        "\nDes: Renam file names\n"
         "Use: llrename [options] directories...   or  files\n"
         "\n"
         " _p_Options (only first unique characters required, options can be repeated):\n"
@@ -411,9 +411,15 @@ int main(int argc, char* argv[]) {
                             num = (unsigned)std::strtol(value, &endStr, 10);
                         } else if (parser.validOption("substitute", cmdName)) {
                             Split parts(value.substr(1), value.substr(0, 1));
-                            subregFrom = parser.getRegEx(parts[0]);
-                            subregTo = parts[1];
-                            haveSubReg = true;
+                            if (parts.size() == 3) { 
+                                subregFrom = parser.getRegEx(parts[0]);
+                                subregTo = parts[1];
+                                haveSubReg = true;
+                            } else {
+                                Colors::showError("Substitute needs two parts split with a unique character, ex -sub=/pat1/replaceWith/\n",
+                                    "The first character is used to find the splits.\n"
+                                    "This substitute does not follow that rule:", value);
+                            }
                         }
                         break;
                     default:
