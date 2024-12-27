@@ -243,7 +243,7 @@ static bool doRename(const lstring& filepath, const lstring& filename) {
     if (!dirWithSlash.empty()) dirWithSlash += Directory_files::SLASH_CHAR;
     getNewFile(newFile, dirWithSlash, oldFile, num);
 
-    if (outListStream) {
+    if (outListPath.size() > 0 && outListStream.good()) {
         unsigned strOffset = fullPath ? 0 : CWD_LEN;
         lstring qOldFile = quote((dirWithSlash + filename) + strOffset, 0);
         lstring qNewFile = quote(newFile + strOffset, 0);
@@ -286,7 +286,7 @@ static bool HandleDir(const lstring& filepath) {
 //-------------------------------------------------------------------------------------------------
 void showHelp(const char* arg0) {
     const char* helpMsg =
-        "  Dennis Lang v2.3 (LandenLabs.com)_X_ " __DATE__ "\n\n"
+        "  Dennis Lang v2.4 (LandenLabs.com)_X_ " __DATE__ "\n\n"
         "\nDes: Renam file names\n"
         "Use: llrename [options] directories...   or  files\n"
         "\n"
@@ -303,6 +303,7 @@ void showHelp(const char* arg0) {
         "   -_y_startNum=1000               ; Start number, def=1 \n"
         "   -_y_no                          ; No rename, dry run \n"
         "   -_y_force                       ; Deleted target if same name \n"
+        "   -_y_recurse                     ; Recurse into directories \n"
         "\n"
         "   -_y_toList=<write_fileName>     ; Output List of 'old','new' \n"
         "   -_y_fromList=<read_fileName>    ; Read List rename pair per line \n"
@@ -328,11 +329,11 @@ void showHelp(const char* arg0) {
         "\n"
         " _p_Example: \n"
 #ifdef HAVE_WIN
-        "  llrename -_y_c -_y_sub=\"/ /_/\" -_y_inc=*.png -_y_exc=foo.png dir1 dir2 \n"
-        "  llrename -_y_C -_y_start=1000 -_y_part=\"N_####.E\" -_y_inc=*.jpg dir1 Foo*.png Bar*.jpg  \n"
+        "  llrename -_y_c -_y_r -_y_sub=\"/ /_/\" -_y_inc=*.png -_y_exc=foo.png dir1 dir2 \n"
+        "  llrename -_y_C -_y_r -_y_start=1000 -_y_part=\"N_####.E\" -_y_inc=*.jpg dir1 Foo*.png Bar*.jpg  \n"
 #else
-        "  llrename -_y_c -_y_sub=\"/ /_/\" -_y_inc=\\*.png -_y_exc=foo.png dir1 dir2 \n"
-        "  llrename -_y_C -_y_start=1000 -_y_part=\"N_####.E\" -_y_inc=\\*.jpg -_y_inc=\\*.png dir1 Foo*.png Bar*.jpg \n"
+        "  llrename -_y_c -_y_r -_y_sub=\"/ /_/\" -_y_inc=\\*.png -_y_exc=foo.png dir1 dir2 \n"
+        "  llrename -_y_C -_y_r -_y_start=1000 -_y_part=\"N_####.E\" -_y_inc=\\*.jpg -_y_inc=\\*.png dir1 Foo*.png Bar*.jpg \n"
 #endif
         "  llrename -_y_sub=\"/([^_]+)_([.*])/$2-$1/\" dir1 \n"
         " _p_Warning with regular expression: \n"
@@ -456,6 +457,10 @@ int main(int argc, char* argv[]) {
                             force = true;
                         }
                         break;
+                    case 'r':   // -recurse
+                        dirscan.recurse = true;
+                        break;
+                                
                     case 's': // SmartQuotes
                         if (parser.validOption("showFiles", cmdName, false)) {
                             showFile = true;

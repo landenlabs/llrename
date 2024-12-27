@@ -50,6 +50,9 @@ class Dirscan {
     ParseFile_t parseFile;
     
 public:
+    bool recurse = false;
+    
+public:
     Dirscan(ParseDir_t _parseDir, ParseFile_t _parseFile) : parseDir(_parseDir), parseFile(_parseFile) {
     }
     // ~Dirscan();

@@ -76,10 +76,9 @@ size_t Dirscan::FindFile(const lstring& fullname) {
 size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
     Directory_files directory(dirname);
     lstring fullname;
-
     size_t fileCount = 0;
 
-
+    
     struct stat filestat;
     try {
         if (stat(dirname, &filestat) == 0 && S_ISREG(filestat.st_mode)) {
@@ -91,6 +90,11 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
         cerr << ex.what() << std::endl;
     }
 
+    if (!directory.more()) {
+        std::cerr << "Unable to scan directory:" << dirname << std::endl;
+        return 0;
+    }
+    
     while (!Signals::aborted && directory.more()) {
         directory.fullName(fullname);
         if (directory.is_directory()) {
@@ -98,7 +102,9 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
                     && ! FileMatches(fullname, excludeDirPatList, false)
                     && FileMatches(fullname, includeDirPatList, true)) {
                 parseDir(fullname);
-                fileCount += FindFiles(fullname, depth + 1);
+                if (recurse) {
+                    fileCount += FindFiles(fullname, depth + 1);
+                }
             }
         } else if (fullname.length() > 0) {
             fileCount += FindFile(fullname);
