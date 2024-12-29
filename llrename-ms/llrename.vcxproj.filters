@@ -60,10 +60,10 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\llrename.png">
+    <Image Include="llrename.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icon1.ico">
+    <Image Include="llrename.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

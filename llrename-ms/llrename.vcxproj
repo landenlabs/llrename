@@ -38,8 +38,8 @@
     <ResourceCompile Include="llrename.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\llrename.png" />
-    <Image Include="icon1.ico" />
+    <Image Include="llrename.ico" />
+    <Image Include="llrename.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
