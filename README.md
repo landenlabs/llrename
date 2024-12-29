@@ -1,35 +1,43 @@
-#llrename
-OSX / Linux / DOS Rename files
+llrename
+### Rename files
 
 
-Visit home website
-
+### Builds
+* OSX(M3)      | Provided Xcode project
+* Windows/DOS  | Provided Visual Studio solution
+ 
+### Visit home website
 [https://landenlabs.com](https://landenlabs.com)
 
+### Description
 
-Help Banner:
+C++ v17 code to build either a windows/dos or Mac/Linux command line tool 
+that can scan directories and rename files, include case change and numbering.
+
+### Help Banner:
 <pre>
-llrename  Dennis Lang v2.1 (LandenLabs.com) Nov 28 2024
+llrename  Dennis Lang v2.3 (LandenLabs.com) Dec 25 2024
 
 
-Des: Renumber file names
+Des: Renam file names
 Use: llrename [options] directories...   or  files
 
  Options (only first unique characters required, options can be repeated):
-   -includeFile=<filePattern>   ; Include files by regex match
-   -excludeFile=<filePattern>   ; Exclude files by regex match
-   -IncludePath=<pathPattern>   ; Include path by regex match
-   -ExcludePath=<pathPattern>   ; Exclude path by regex match
+   -includeFile=&lt;filePattern>   ; Include files by regex match
+   -excludeFile=&lt;filePattern>   ; Exclude files by regex match
+   -IncludePath=&lt;pathPattern>   ; Include path by regex match
+   -ExcludePath=&lt;pathPattern>   ; Exclude path by regex match
    -D                           ; Rename directory
    -c/C                         ; lowercase or Uppercase
-   -sub=<regexp>                ; substitude regexpression
+   -sub=&lt;regexp>                ; substitude regexpression
                                       /fromRexex/toRegex/
-   -parts=<fileParts>           ; See fileParts note below
+   -parts=&lt;fileParts>           ; See fileParts note below
    -startNum=1000               ; Start number, def=1
    -no                          ; No rename, dry run
+   -force                       ; Deleted target if same name
 
-   -toList=<write_fileName>     ; Output List of 'old','new'
-   -fromList=<read_fileName>    ; Read List rename pair per line
+   -toList=&lt;write_fileName>     ; Output List of 'old','new'
+   -fromList=&lt;read_fileName>    ; Read List rename pair per line
  Used with -fromList
    -1       [default]           ; Rename 'old' to 'new'
    -2                           ; Rename 'new' to 'old'
@@ -40,7 +48,7 @@ Use: llrename [options] directories...   or  files
    -logEnd="\n"              ; Log end of line, def="\n"
 
  FileParts:
-     N=name, E=extension, #=number
+     N=name, E=extension, #=number (note uppercase N and E)
      N-#.E
      N_####.E
      N.'foo'
@@ -50,8 +58,14 @@ Use: llrename [options] directories...   or  files
    -verbose                     ; Only dump parsed json
 
  Example:
-  llrename -c -sub="/ /_/" -inc=\*.png -exc=foo.png dir1 dir2
-  llrename -C -start=1000 -part="N_####.E" -inc=\*.jpg -inc=\*.png dir1 Foo*.png Bar*.jpg
+  llrename -c -sub="/ /_/" -inc=*.png -exc=foo.png dir1 dir2
+  llrename -C -start=1000 -part="N_####.E" -inc=*.jpg dir1 Foo*.png Bar*.jpg
   llrename -sub="/([^_]+)_([.*])/$2-$1/" dir1
+ Warning with regular expression:
+   Remember to escape special characters, such as ., ( and [
+   For example to remove all  "copy (2) of" use
+   -sub="/copy [(][0-9][)] of//"
 
 </pre>
+
+[Top](#top)
