@@ -19,7 +19,7 @@ that can scan directories and rename files, include case change and numbering.
 llrename  Dennis Lang v2.3 (LandenLabs.com) Dec 25 2024
 
 
-Des: Renam file names
+Des: Rename file names
 Use: llrename [options] directories...   or  files
 
  Options (only first unique characters required, options can be repeated):

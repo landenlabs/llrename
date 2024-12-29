@@ -287,7 +287,7 @@ static bool HandleDir(const lstring& filepath) {
 void showHelp(const char* arg0) {
     const char* helpMsg =
         "  Dennis Lang v2.4 (LandenLabs.com)_X_ " __DATE__ "\n\n"
-        "\nDes: Renam file names\n"
+        "\nDes: Rename file names\n"
         "Use: llrename [options] directories...   or  files\n"
         "\n"
         " _p_Options (only first unique characters required, options can be repeated):\n"
