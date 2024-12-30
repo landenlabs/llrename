@@ -130,24 +130,13 @@ class Colors {
 public:
     static string colorize(const char* inStr);
 
-    template <typename... Things>
-    static void cerrArgs(Things... things) {
-        for (const auto p : {things...}) {
-            std::cerr << p << std::endl;
-        }
-    }
-
     // Requires C++ v17+
     // Show error in RED
     template<typename T, typename... Args>
     static void showError(T first, Args... args) {
         std::cerr << Colors::colorize("_R_");
         std::cerr << first;
-// #ifdef HAVE_WIN
-//        cerrArgs(args...);
-// #else
         ((std::cerr << args << " "), ...);
-// #endif
         std::cerr << Colors::colorize("_X_\n");
     }
 };
