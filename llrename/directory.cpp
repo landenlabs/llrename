@@ -7,8 +7,6 @@
 // Author: Dennis Lang - 2024
 // https://landenlabs.com
 //
-// This file is part of llrename project.
-//
 // ----- License ----
 //
 // Copyright (c) 2024  Dennis Lang
@@ -38,11 +36,11 @@
 const char EXTN_CHAR = '.';
 
 #ifdef HAVE_WIN
-#define byte win_byte_override          // Fix for c++ v17
+#define byte win_byte_override  // Fix for c++ v17
 #include <windows.h>
-#undef byte                             // Fix for c++ v17
+#undef byte                     // Fix for c++ v17
 #include <io.h>
- 
+
 typedef unsigned short mode_t;
 
 static const mode_t S_IRUSR = mode_t(_S_IREAD);     //  read by user
@@ -299,13 +297,13 @@ bool DirUtil::deleteFile(bool dryRun, const char* inPath) {
             setPermission(inPath, S_IWUSR);
         err = remove(inPath);
     }
-    
+
     if (err != 0)
         std::cerr << strerror(errno) << " deleting " << inPath << std::endl;
     else
         std::cerr << "Deleted " << inPath << std::endl;
-    
-    
+
+
     return (err == 0);
 }
 
@@ -334,7 +332,7 @@ bool deleteFile(const char* path) {
 bool DirUtil::setPermission(const char* relPath, unsigned permission, bool setAllParts) {
     if (relPath == nullptr || strlen(relPath) <= 1)
         return true;
-    
+
     lstring dir;
     struct stat pathStat;
     int err = stat(relPath, &pathStat);

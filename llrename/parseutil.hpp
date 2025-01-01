@@ -40,22 +40,25 @@
 
 typedef std::vector<std::regex> PatternList;
 
-
 //-------------------------------------------------------------------------------------------------
 class ParseUtil {
     
 public:
+    bool ignoreCase = false;
+    bool unixRegEx = false;
     unsigned optionErrCnt = 0;
     unsigned patternErrCnt = 0;
+    std::set<std::string> parseArgSet;
 
     void showUnknown(const char* argStr);
+
     std::regex getRegEx(const char* value);
- 
+
     bool validOption(const char* validCmd, const char* possibleCmd, bool reportErr = true);
     bool validPattern(PatternList& outList, lstring& value, const char* validCmd, const char* possibleCmd, bool reportErr = true);
  
     bool validFile(fstream& stream, int mode, const lstring& value, const char* validCmd, const char* possibleCmd, bool reportErr = true);
-    
+
     static bool FileMatches(const lstring& inName, const PatternList& patternList, bool emptyResult);
     static const char* convertSpecialChar(const char* inPtr);
     static std::string& fmtDateTime(string& outTmStr, time_t& now);
@@ -136,8 +139,7 @@ public:
     static void showError(T first, Args... args) {
         std::cerr << Colors::colorize("_R_");
         std::cerr << first;
-        ((std::cerr << args << " "), ...);
+        ( ( std::cerr << args << " " ), ... );
         std::cerr << Colors::colorize("_X_\n");
     }
 };
-
