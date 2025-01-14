@@ -71,6 +71,8 @@ using namespace std;
 const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
 #endif
 
+#define VERSION  "v2.5"
+
 // Helper types
 typedef unsigned int uint;
 typedef std::vector<lstring> StringList;
@@ -122,8 +124,9 @@ static const char* quote(const lstring& path, unsigned rootDirLen) {
 // ---------------------------------------------------------------------------
 lstring lastChdir;
 static void doChdir(const char* dir) {
-    if (lastChdir == dir)
+    if (lastChdir == dir) {
         return;
+    }
 
     if (chdir(dir) == 0) {
         lastChdir = dir;
@@ -136,7 +139,12 @@ static void doChdir(const char* dir) {
 
 // ---------------------------------------------------------------------------
 static int doRenameC(const char* oldName, const char* newName) {
-    return (dryRun) ? 0 : rename(oldName, newName);
+    // if (DirUtil::fileExists(oldName)) {
+        return (dryRun) ? 0 : rename(oldName, newName);
+    // } else {
+    //     Colors::showError("File does not exist:", oldName);
+    //     return 0;
+    // }
 }
 
 // ---------------------------------------------------------------------------
@@ -148,6 +156,7 @@ static bool doRenameB(const char* oldName, const char* newName) {
     lstring dir1, dir2;
     DirUtil::getDir(dir1, oldName);
     DirUtil::getDir(dir2, newName);
+    size_t dirLen = 0;
     
     if (dir1 == dir2) {
         if (force && DirUtil::fileExists(newName)) {
@@ -158,7 +167,7 @@ static bool doRenameB(const char* oldName, const char* newName) {
         code = doRenameC(oldName, newName);  // rename absolute path
 #else
         doChdir(dir1);
-        size_t dirLen = dir1.length() + 1;
+        dirLen = dir1.empty() ? 0 : dir1.length() +1; // +1 skip trailing slash
         code = doRenameC(oldName + dirLen, newName + dirLen);  // rename relative path, see doChdir()
 #endif
         errMsg = (code == 0) ? "" : strerror(errno);
@@ -168,8 +177,9 @@ static bool doRenameB(const char* oldName, const char* newName) {
     }
     
 
-    if (verbose || code != 0)
-        Colors::showError(errMsg, action, oldName+CWD_LEN, " to ", newName+CWD_LEN);
+    if (verbose || code != 0) {
+        Colors::showError(errMsg, action, oldName, " to ", newName);
+    }
 
     return (code == 0);
 }
@@ -286,7 +296,7 @@ static bool HandleDir(const lstring& filepath) {
 //-------------------------------------------------------------------------------------------------
 void showHelp(const char* arg0) {
     const char* helpMsg =
-        "  Dennis Lang v2.4 (LandenLabs.com)_X_ " __DATE__ "\n\n"
+        "  Dennis Lang "  VERSION  " (LandenLabs.com)_X_ " __DATE__ "\n\n"
         "\nDes: Rename file names\n"
         "Use: llrename [options] directories...   or  files\n"
         "\n"
