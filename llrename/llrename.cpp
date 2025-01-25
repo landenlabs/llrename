@@ -9,8 +9,6 @@
 // Author: Dennis Lang - 2024
 // https://landenlabs.com/
 //
-//  
-//
 // ----- License ----
 //
 // Copyright (c) 2024 Dennis Lang
@@ -301,13 +299,13 @@ void showHelp(const char* arg0) {
         "Use: llrename [options] directories...   or  files\n"
         "\n"
         " _p_Options (only first unique characters required, options can be repeated):\n"
-        "   -_y_includeFile=<filePattern>   ; Include files by regex match \n"
-        "   -_y_excludeFile=<filePattern>   ; Exclude files by regex match \n"
+        "   -_y_includeItem=<filePattern>   ; Include files or dirs by regex match \n"
+        "   -_y_excludeItem=<filePattern>   ; Exclude files or dirs by regex match \n"
         "   -_y_IncludePath=<pathPattern>   ; Include path by regex match \n"
         "   -_y_ExcludePath=<pathPattern>   ; Exclude path by regex match \n"
         "   -_y_D                           ; Rename directory \n"
         "   -_y_c/C                         ; lowercase or Uppercase \n"
-        "   -_y_sub=<regexp>                ; substitude regexpression \n"
+        "   -_y_sub=<regexp>                ; substitute regexpression \n"
         "                                      /fromRexex/toRegex/ \n"
         "   -_y_parts=<fileParts>           ; See fileParts note below\n"
         "   -_y_startNum=1000               ; Start number, def=1 \n"
@@ -350,6 +348,10 @@ void showHelp(const char* arg0) {
         "   Remember to escape special characters, such as ., ( and [ \n"
         "   For example to remove all  \"copy (2) of\" use \n"
         "   -sub=\"/copy [(][0-9][)] of//\" \n"
+        "\n"
+        "   The include/exclude regular expression internally converts \n"
+        "      * to .*   and  ?  to . \n"
+        "     Ex:  *.png  is internally .*.png \n"
         "\n";
     
     std::cerr << Colors::colorize("\n_W_") << arg0 << Colors::colorize(helpMsg);
@@ -384,17 +386,17 @@ int main(int argc, char* argv[]) {
                     
                     const char* cmdName = cmd+1;
                     switch (*cmdName) {
-                    case 'e':   // -excludeFile=<pat>
-                        parser.validPattern(dirscan.excludeFilePatList, value, "excludeFile", cmdName);
+                    case 'e':   // -excludeItem=<pat>
+                        parser.validPattern(dirscan.excludeFilePatList, value, "excludeItem", cmdName);
                         break;
-                    case 'E':   // -ExcludeDir=<pat>
-                        parser.validPattern(dirscan.excludeDirPatList, value, "ExcludeDir", cmdName);
+                    case 'E':   // -ExcludePath=<pat>
+                        parser.validPattern(dirscan.excludeDirPatList, value, "ExcludePath", cmdName);
                         break;
-                    case 'i':   // -includeFile=<pat>
-                        parser.validPattern(dirscan.includeFilePatList, value, "includeFile", cmdName);
+                    case 'i':   // -includeItem=<pat>
+                        parser.validPattern(dirscan.includeFilePatList, value, "includeItem", cmdName);
                         break;
-                    case 'I':   // -IncludeDir=<pat>
-                        parser.validPattern(dirscan.includeDirPatList, value, "includeDir", cmdName);
+                    case 'I':   // -IncludePath=<pat>
+                        parser.validPattern(dirscan.includeDirPatList, value, "IncludePath", cmdName);
                         break;
                     case 'f':   // -fromList=<filepath>
                         parser.validFile(inListStream, std::ios::in, inListPath=value, "fromList", cmdName);

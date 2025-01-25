@@ -16,25 +16,26 @@ that can scan directories and rename files, include case change and numbering.
 
 ### Help Banner:
 <pre>
-llrename  Dennis Lang v2.3 (LandenLabs.com) Dec 25 2024
+llrename  Dennis Lang v2.5 (LandenLabs.com) Jan 25 2025
 
 
 Des: Rename file names
 Use: llrename [options] directories...   or  files
 
  Options (only first unique characters required, options can be repeated):
-   -includeFile=&lt;filePattern>   ; Include files by regex match
-   -excludeFile=&lt;filePattern>   ; Exclude files by regex match
+   -includeItem=&lt;filePattern>   ; Include files or dirs by regex match
+   -excludeItem=&lt;filePattern>   ; Exclude files or dirs by regex match
    -IncludePath=&lt;pathPattern>   ; Include path by regex match
    -ExcludePath=&lt;pathPattern>   ; Exclude path by regex match
    -D                           ; Rename directory
    -c/C                         ; lowercase or Uppercase
-   -sub=&lt;regexp>                ; substitude regexpression
+   -sub=&lt;regexp>                ; substitute regexpression
                                       /fromRexex/toRegex/
    -parts=&lt;fileParts>           ; See fileParts note below
    -startNum=1000               ; Start number, def=1
    -no                          ; No rename, dry run
    -force                       ; Deleted target if same name
+   -recurse                     ; Recurse into directories
 
    -toList=&lt;write_fileName>     ; Output List of 'old','new'
    -fromList=&lt;read_fileName>    ; Read List rename pair per line
@@ -58,13 +59,17 @@ Use: llrename [options] directories...   or  files
    -verbose                     ; Only dump parsed json
 
  Example:
-  llrename -c -sub="/ /_/" -inc=*.png -exc=foo.png dir1 dir2
-  llrename -C -start=1000 -part="N_####.E" -inc=*.jpg dir1 Foo*.png Bar*.jpg
+  llrename -c -r -sub="/ /_/" -inc=*.png -exc=foo.png dir1 dir2
+  llrename -C -r -start=1000 -part="N_####.E" -inc=*.jpg dir1 Foo*.png Bar*.jpg
   llrename -sub="/([^_]+)_([.*])/$2-$1/" dir1
  Warning with regular expression:
    Remember to escape special characters, such as ., ( and [
    For example to remove all  "copy (2) of" use
    -sub="/copy [(][0-9][)] of//"
+
+   The include/exclude regular expression internally converts
+      * to .*   and  ?  to .
+     Ex:  *.png  is internally .*.png
 
 </pre>
 
