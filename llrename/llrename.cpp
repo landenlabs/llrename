@@ -9,7 +9,7 @@
 // Author: Dennis Lang - 2024
 // https://landenlabs.com/
 //
-// This file is part of llrename project.
+//  
 //
 // ----- License ----
 //
