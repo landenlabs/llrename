@@ -324,7 +324,7 @@ void showHelp(const char* arg0) {
         "   -_y_logSep=\", \"               ; Log separator string, def=\", \" \n"
         "   -_y_logEnd=\"\\n\"              ; Log end of line, def=\"\\n\" \n"
         "\n"
-        " _p_FileParts:\n"
+        " _p_Options for -_y_parts  (default=N.E)\n"
         "     N=name, E=extension, #=number (note uppercase N and E)\n"
         "     N-#.E \n"
         "     N_####.E \n"

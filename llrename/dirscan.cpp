@@ -90,7 +90,7 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
         cerr << ex.what() << std::endl;
     }
 
-    if (!directory.more()) {
+    if (directory.name() != nullptr ) {
         std::cerr << "Unable to scan directory:" << dirname << std::endl;
         return 0;
     }

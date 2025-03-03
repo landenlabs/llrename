@@ -242,13 +242,13 @@ lstring& ParseUtil::getParts(
                 outPart += name;
                 break;
             case '#':   // Size
-                width = 1;
+                width = 0;
                 while (*fmt++ == '#')
                     width++;
                 fmt -= 2;
                 snprintf(numFmt, sizeof(numFmt), "%%0%uu", width);
                 snprintf(numStr, sizeof(numStr), numFmt, num);
-                outPart += numStr;
+                outPart += numStr + strlen(numStr) - width;
                 break;
             default:
                 outPart += *fmt;
