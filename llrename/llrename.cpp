@@ -69,7 +69,7 @@ using namespace std;
 const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
 #endif
 
-#define VERSION  "v2.5"
+#define VERSION  "v2.6"
 
 // Helper types
 typedef unsigned int uint;
@@ -264,6 +264,9 @@ static bool doRename(const lstring& filepath, const lstring& filename) {
     if (showFile)
         std::cout << filepath << std::endl;
     
+    if (verbose) {
+        std::cout << "Rename from=" << filepath << " to=" << newFile << std::endl;
+    }
     bool okay = (filepath != newFile) && doRenameA(filepath, newFile);
     if (okay)
        num++;
@@ -461,12 +464,18 @@ int main(int argc, char* argv[]) {
                         std::cerr << "Renaming directories\n";
                         break;
                             
-     // ------ special use case
                     case 'f':   // full path
                         if (parser.validOption("fullpath", cmdName, false)) {
                             fullPath = true;
                         } else if (parser.validOption("force", cmdName)) {
                             force = true;
+                        }
+                        break;
+                            
+                    case 'h':
+                        if (parser.validOption("help", cmdName)) {
+                            showHelp(argv[0]);
+                            return 0;
                         }
                         break;
                     case 'r':   // -recurse
@@ -504,6 +513,30 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        if (verbose) {
+            std::cout << "--- Settings ---\n";
+            if (showFile) std::cout << "ShowFile\n";
+            if (dryRun) std::cout << "Dry run\n";
+            if (fullPath) std::cout << "show full path\n";
+            if (invert) std::cout << "Invert list?\n";
+            if (smartQuote) std::cout << "Smart Quotes\n";
+            if (force) std::cout << "Force delete\n";
+            if (doDirectories) std::cout << "Do directories\n";
+            if (dirscan.recurse) std:cout << "Recurse\n";
+            if (casefold != '-') std::cout << "CaseFold=" << casefold << std::endl;
+            
+            std::cout << "Parts=" <<  parts << std::endl;
+            if (haveSubReg) {
+                // static regex subregFrom;
+                std::cout << "SubTo=" << subregTo << std::endl;
+            }
+            
+            std::cout << "LogPrefix=" << logPrefix << std::endl;
+            std::cout << "logSep=" << logSep << std::endl;
+            std::cout << "logEndl=" << logEndl << std::endl;
+            std::cout << "--- End Settings ---\n";
+        }
+        
         if (parser.patternErrCnt == 0 && parser.optionErrCnt == 0) {
             for (auto const& filePath : extraDirList)  {
                 dirscan.FindFiles(filePath, 0);
