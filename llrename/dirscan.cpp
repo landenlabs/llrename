@@ -92,8 +92,11 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
                 }
             }
         } else {
+#ifdef HAVE_WIN
+#else 
             std::cerr << "Unable to scan directory:" << dirname << std::endl;
             return 0;
+#endif
         }
     }  catch (exception ex)  {
         // Probably a pattern, let directory scan do its magic.

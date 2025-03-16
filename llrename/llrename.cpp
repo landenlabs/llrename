@@ -69,7 +69,7 @@ using namespace std;
 const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
 #endif
 
-#define VERSION  "v2.6"
+#define VERSION  "v2.7"
 
 // Helper types
 typedef unsigned int uint;
@@ -91,9 +91,6 @@ static bool force = false;      // delete target if same name
 
 static char casefold = '-';
 static lstring parts;
-static regex subregFrom;
-static lstring subregTo;
-static bool haveSubReg = false;
 static bool doDirectories = false;
 
 static lstring logPrefix = "";
@@ -105,6 +102,14 @@ static lstring inListPath;
 static fstream outListStream;
 static lstring outListPath;
 
+class Substitute { 
+public:
+    regex subregFrom;
+    lstring subregTo;
+};
+typedef std::vector<Substitute> SubstituteList;
+static SubstituteList substituteList;
+ 
 
 // ---------------------------------------------------------------------------
 static char QUOTE_BUF[MAX_PATH];
@@ -217,8 +222,8 @@ static void renameFromStream(istream& inStream) {
 }
 
 // ---------------------------------------------------------------------------
-// Open, read and parse file.
-static const lstring& getNewFile(lstring& outPath, const lstring& dir, lstring& name, unsigned num) {
+// Handle "part" renaming. 
+static const lstring& getPartRename(lstring& outPath, const lstring& dir, lstring& name, unsigned num) {
     outPath = dir;
     if (parts.empty()) {
         outPath += name;
@@ -237,19 +242,19 @@ static const lstring& getNewFile(lstring& outPath, const lstring& dir, lstring& 
 static bool doRename(const lstring& filepath, const lstring& filename) {
     lstring dirWithSlash, newFile;
     
-    lstring oldFile = filename;
+    lstring tmpFile = filename;
     if (casefold == 'c')
-        oldFile = oldFile.toLower();
+        tmpFile = tmpFile.toLower();
     else if (casefold == 'C')
-        oldFile = oldFile.toUpper();
+        tmpFile = tmpFile.toUpper();
     
-    if (haveSubReg) {
-        oldFile = regex_replace(oldFile, subregFrom, subregTo);
+    for(auto item : substituteList) {
+        tmpFile = regex_replace(tmpFile, item.subregFrom, item.subregTo);
     }
     
     DirUtil::getDir(dirWithSlash, filepath);
     if (!dirWithSlash.empty()) dirWithSlash += Directory_files::SLASH_CHAR;
-    getNewFile(newFile, dirWithSlash, oldFile, num);
+    getPartRename(newFile, dirWithSlash, tmpFile, num);
 
     if (outListPath.size() > 0 && outListStream.good()) {
         unsigned strOffset = fullPath ? 0 : CWD_LEN;
@@ -264,7 +269,7 @@ static bool doRename(const lstring& filepath, const lstring& filename) {
     if (showFile)
         std::cout << filepath << std::endl;
     
-    if (verbose) {
+    if (verbose && !dryRun) {
         std::cout << "Rename from=" << filepath << " to=" << newFile << std::endl;
     }
     bool okay = (filepath != newFile) && doRenameA(filepath, newFile);
@@ -428,9 +433,10 @@ int main(int argc, char* argv[]) {
                         } else if (parser.validOption("substitute", cmdName)) {
                             Split parts(value.substr(1), value.substr(0, 1));
                             if (parts.size() == 3) { 
-                                subregFrom = parser.getRegEx(parts[0]);
-                                subregTo = parts[1];
-                                haveSubReg = true;
+                                Substitute item;
+                                item.subregFrom = parser.getRegEx(parts[0]);
+                                item.subregTo = parts[1];
+                                substituteList.push_back(item);
                             } else {
                                 Colors::showError("Substitute needs two parts split with a unique character, ex -sub=/pat1/replaceWith/\n",
                                     "The first character is used to find the splits.\n"
@@ -526,9 +532,9 @@ int main(int argc, char* argv[]) {
             if (casefold != '-') std::cout << "CaseFold=" << casefold << std::endl;
             
             std::cout << "Parts=" <<  parts << std::endl;
-            if (haveSubReg) {
+            for (auto item : substituteList) {
                 // static regex subregFrom;
-                std::cout << "SubTo=" << subregTo << std::endl;
+                std::cout << "SubTo=" << item.subregTo << std::endl;
             }
             
             std::cout << "LogPrefix=" << logPrefix << std::endl;
