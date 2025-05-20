@@ -8,8 +8,15 @@
 *.xcuserstate
 
 # Windows VisualStudio
+# windows
 .ipch/
 x64/
+obj/
+bin/
+lib/
 .vs/
-.obj
-.exe
+*.obj
+*.exe
+*.pdb
+*.lib
+*.aps
