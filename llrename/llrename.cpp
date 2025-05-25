@@ -65,11 +65,12 @@ using namespace std;
 
 #define chdir _chdir
 #define getcwd _getcwd
+#define stricmp _stricmp
 #else
 const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
 #endif
 
-#define VERSION  "v2.7"
+#define VERSION  "v2.8"
 
 // Helper types
 typedef unsigned int uint;
@@ -142,12 +143,12 @@ static void doChdir(const char* dir) {
 
 // ---------------------------------------------------------------------------
 static int doRenameC(const char* oldName, const char* newName) {
-    // if (DirUtil::fileExists(oldName)) {
+    if (stricmp(oldName, newName) == 0 || !DirUtil::fileExists(newName)) {
         return (dryRun) ? 0 : rename(oldName, newName);
-    // } else {
-    //     Colors::showError("File does not exist:", oldName);
-    //     return 0;
-    // }
+    } else {
+         Colors::showError("New file already exists:", newName);
+         return 0;
+    }
 }
 
 // ---------------------------------------------------------------------------
