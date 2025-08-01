@@ -42,7 +42,7 @@
 #endif
 
 typedef std::vector<std::regex> PatternList;
-typedef bool (*ParseDir_t)(const lstring& filepath);
+typedef bool (*ParseDir_t)(const lstring& filepath, bool onEntry);
 typedef bool (*ParseFile_t)(const lstring& filepath, const lstring& filename);
 
 class Dirscan {

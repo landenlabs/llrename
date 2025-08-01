@@ -216,8 +216,8 @@ std::string& ParseUtil::fmtDateTime(string& outTmStr, time_t& now) {
 
 //-------------------------------------------------------------------------------------------------
 // [static]
-lstring& ParseUtil::getParts(
-        lstring& outPart,
+string& ParseUtil::getParts(
+        string& outPart,
         const char* partSelector,
         const char* name,       // just name, not extension
         const char* ext,        // just extension, no dot prefix

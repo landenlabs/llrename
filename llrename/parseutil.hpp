@@ -62,8 +62,8 @@ public:
     static bool FileMatches(const lstring& inName, const PatternList& patternList, bool emptyResult);
     static const char* convertSpecialChar(const char* inPtr);
     static std::string& fmtDateTime(string& outTmStr, time_t& now);
-    static lstring& getParts(
-            lstring& outPart,
+    static string& getParts(
+            string& outPart,
             const char* partSelector,
             const char* name,
             const char* ext,

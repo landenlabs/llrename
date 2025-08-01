@@ -68,9 +68,10 @@ using namespace std;
 #define stricmp _stricmp
 #else
 const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
+#define stricmp strcasecmp
 #endif
 
-#define VERSION  "v2.8"
+#define VERSION  "v2.9"
 
 // Helper types
 typedef unsigned int uint;
@@ -81,6 +82,7 @@ static char CWD_BUF[MAX_PATH];
 static unsigned CWD_LEN = 0;
 const unsigned START_NUM = 1;
 static unsigned num = START_NUM;
+static unsigned modifyNum = 0;  // 0=no modification
 
 static bool showFile = false;
 static bool verbose = false;
@@ -177,7 +179,7 @@ static bool doRenameB(const char* oldName, const char* newName) {
         errMsg = (code == 0) ? "" : strerror(errno);
         action = " rename ";
     } else {
-        Colors::showError("Something went wrong, base directory changed ", dir1);
+        Colors::showError("Can't rename subDir,  Base:", dir1," From:", oldName, " To:", newName);
     }
     
 
@@ -222,19 +224,46 @@ static void renameFromStream(istream& inStream) {
     }
 }
 
+// Normal sequence
+// static const char shiftSet[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+// Drop a few character
+//                              1234567890123456789012345678901234567890123456789012345678901234
+static const char shiftSet[] = "013456789ABCDEFGHJKLMNOPQRSTUVWXYZabcdefhijklmnopqrstuvwxyz+-[]_"; // 64 = power of 2
+static const unsigned shiftLen = sizeof(shiftSet)-1;
+
+static void shiftAlphaNumeric(string& outPath, unsigned shiftBy) {
+    assert (shiftBy < shiftLen);
+    assert (shiftBy != 0);
+    assert (shiftLen == 64);  // xor requires power of 2.
+    int idx = (int)outPath.length();
+    while (--idx >= 0) {
+        const char* ptr = strchr(shiftSet, outPath[idx]);
+        if (ptr != nullptr) {
+            unsigned pos = unsigned(ptr - shiftSet);
+            outPath[idx] = shiftSet[(pos ^ shiftBy) % shiftLen];
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Handle "part" renaming. 
-static const lstring& getPartRename(lstring& outPath, const lstring& dir, lstring& name, unsigned num) {
+static const lstring& getPartRename(lstring& outPath, const lstring& dir, lstring& name, unsigned num, unsigned modifyNum) {
+    string tmpName = name;  // make local copy so use string and not lstring
+    if (modifyNum != 0) {
+        shiftAlphaNumeric(tmpName, modifyNum);
+    }
+    
     outPath = dir;
     if (parts.empty()) {
-        outPath += name;
+        outPath += tmpName;
     } else {
         lstring extn;
         DirUtil::getExt(extn, name);
-        name.resize(name.length() - extn.length() - 1);
+        tmpName.resize(name.length() - extn.length() - 1);
         lstring part;
-        outPath += ParseUtil::getParts(part, parts, name, extn, num);
+        outPath += ParseUtil::getParts(part, parts, tmpName.c_str(), extn, num);
     }
+   
     return outPath;
 }
     
@@ -255,7 +284,7 @@ static bool doRename(const lstring& filepath, const lstring& filename) {
     
     DirUtil::getDir(dirWithSlash, filepath);
     if (!dirWithSlash.empty()) dirWithSlash += Directory_files::SLASH_CHAR;
-    getPartRename(newFile, dirWithSlash, tmpFile, num);
+    getPartRename(newFile, dirWithSlash, tmpFile, num, modifyNum);
 
     if (outListPath.size() > 0 && outListStream.good()) {
         unsigned strOffset = fullPath ? 0 : CWD_LEN;
@@ -290,8 +319,9 @@ static bool HandleFile(const lstring& filepath, const lstring& filename) {
 }
 
 //-------------------------------------------------------------------------------------------------
-static bool HandleDir(const lstring& filepath) {
-    if (doDirectories) {
+static bool HandleDir(const lstring& filepath, bool onEntry) {
+    if (doDirectories && !onEntry) {
+        // only do directory rename when recursion is exiting the directory level
         lstring dir, name;
         DirUtil::getDir(dir, filepath);
         DirUtil::getName(name, filepath);
@@ -321,6 +351,8 @@ void showHelp(const char* arg0) {
         "   -_y_no                          ; No rename, dry run \n"
         "   -_y_force                       ; Deleted target if same name \n"
         "   -_y_recurse                     ; Recurse into directories \n"
+        "\n"
+        "   -_y_modify[=shiftBy]            ; Modify name (shift char) \n"
         "\n"
         "   -_y_toList=<write_fileName>     ; Output List of 'old','new' \n"
         "   -_y_fromList=<read_fileName>    ; Read List rename pair per line \n"
@@ -422,6 +454,12 @@ int main(int argc, char* argv[]) {
                             logEndl = ParseUtil::convertSpecialChar(value);
                         }
                         break;
+                    case 'm':   // -modify=nn
+                        if (parser.validOption("modify", cmdName)) {
+                            char* endStr;
+                            modifyNum = (unsigned)std::strtol(value, &endStr, 10);
+                        }
+                        break;
                     case 'p':   // -parts="<format/sector>"
                         if (parser.validOption("parts", cmdName)) {
                             parts = ParseUtil::convertSpecialChar(value);
@@ -485,6 +523,9 @@ int main(int argc, char* argv[]) {
                             return 0;
                         }
                         break;
+                    case 'm':   // modify
+                        modifyNum = 11;
+                        break;
                     case 'r':   // -recurse
                         dirscan.recurse = true;
                         break;
@@ -537,6 +578,10 @@ int main(int argc, char* argv[]) {
                 // static regex subregFrom;
                 std::cout << "SubTo=" << item.subregTo << std::endl;
             }
+            if (num != 0)
+                std::cout << "Start=" << num << std::endl;
+            if (modifyNum != 0)
+                std::cout << "Modify=" << modifyNum << std::endl;
             
             std::cout << "LogPrefix=" << logPrefix << std::endl;
             std::cout << "logSep=" << logSep << std::endl;

@@ -77,6 +77,7 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
     Directory_files directory(dirname);
     lstring fullname;
     size_t fileCount = 0;
+    bool isDir = false;
 
     struct stat filestat;
     try {
@@ -88,13 +89,16 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
                 if ((maxDepth == 0 || depth < maxDepth)
                         && ! FileMatches(fullname, excludeDirPatList, false)
                         && FileMatches(fullname, includeDirPatList, true)) {
-                    parseDir(dirname);
+                    isDir = true;
+                    parseDir(dirname, true);
                 }
             }
         } else {
 #ifdef HAVE_WIN
-#else 
-            std::cerr << "Unable to scan directory:" << dirname << std::endl;
+#else
+            char CWD_BUF[256];
+            getcwd(CWD_BUF, sizeof(CWD_BUF));
+            std::cerr << "Unable to scan directory:" << CWD_BUF << " " << dirname << std::endl;
             return 0;
 #endif
         }
@@ -109,7 +113,7 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
             if ((maxDepth == 0 || depth < maxDepth)
                     && ! FileMatches(fullname, excludeDirPatList, false)
                     && FileMatches(fullname, includeDirPatList, true)) {
-                parseDir(fullname);
+                parseDir(fullname, true);
                 if (recurse) {
                     fileCount += FindFiles(fullname, depth + 1);
                 }
@@ -119,6 +123,8 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
         }
     }
 
+    if (isDir)
+        parseDir(dirname, false);
     return fileCount;
 }
 
