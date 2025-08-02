@@ -352,7 +352,7 @@ void showHelp(const char* arg0) {
         "   -_y_force                       ; Deleted target if same name \n"
         "   -_y_recurse                     ; Recurse into directories \n"
         "\n"
-        "   -_y_modify[=shiftBy]            ; Modify name (shift char) \n"
+        "   -_y_modify[=code]               ; Modify name (code=1..n < 64)) \n"
         "\n"
         "   -_y_toList=<write_fileName>     ; Output List of 'old','new' \n"
         "   -_y_fromList=<read_fileName>    ; Read List rename pair per line \n"
@@ -524,7 +524,7 @@ int main(int argc, char* argv[]) {
                         }
                         break;
                     case 'm':   // modify
-                        modifyNum = 11;
+                        modifyNum = 13;
                         break;
                     case 'r':   // -recurse
                         dirscan.recurse = true;
