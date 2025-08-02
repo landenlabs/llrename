@@ -224,6 +224,10 @@ static void renameFromStream(istream& inStream) {
     }
 }
 
+// Blacklist of filename characters <>:"/\|?*
+// Sequence used in llbin22 which uses the wrap offset approach.
+// const char VALID_CHARS[] = "abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789 ~`!@#$%^&()+={}[];',";
+
 // Normal sequence
 // static const char shiftSet[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 // Drop a few character
