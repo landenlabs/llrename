@@ -54,6 +54,7 @@
 #include <exception>
 #include <assert.h>
 
+
 using namespace std;
 
 #ifdef HAVE_WIN
@@ -62,6 +63,13 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+
+#include <codecvt>
+#include <locale>
+// C++ 17
+#include <filesystem>
+#include <io.h>
+#include <fcntl.h>
 
 #define chdir _chdir
 #define getcwd _getcwd
@@ -91,6 +99,7 @@ static bool fullPath = false;
 static bool invert = false;
 static bool smartQuote = false; // only quote if spaces
 static bool force = false;      // delete target if same name
+static bool wideTo8 = false;    // Convert wide character names to multi-byte (utf-8)
 
 static char casefold = '-';
 static lstring parts;
@@ -355,6 +364,7 @@ void showHelp(const char* arg0) {
         "   -_y_no                          ; No rename, dry run \n"
         "   -_y_force                       ; Deleted target if same name \n"
         "   -_y_recurse                     ; Recurse into directories \n"
+        "   -_y_wide                        ; Wide char to utf-8\n"
         "\n"
         "   -_y_modify[=code]               ; Modify name (code=1..n < 64)) \n"
         "\n"
@@ -401,6 +411,90 @@ void showHelp(const char* arg0) {
     
     std::cerr << Colors::colorize("\n_W_") << arg0 << Colors::colorize(helpMsg);
 }
+
+#ifdef HAVE_WIN
+std::string toString(const std::wstring& wstr, char fallback = '_') {
+    if (wstr.empty()) {
+        return std::string();
+    }
+
+    // Set up the default character to be used for unconvertible characters.
+    // The last parameter (lpUsedDefaultChar) will be set to TRUE if the default character was used.
+    BOOL used_default_char = FALSE;
+
+    // Calculate the required buffer size
+    // CP_ACP is the system's default ANSI code page
+    // You could also use CP_UTF8 for UTF-8 output
+    int size_needed = WideCharToMultiByte(
+        CP_ACP,                 // Code page to use for the conversion
+        0,                      // Conversion flags
+        wstr.c_str(),           // Pointer to the wide string
+        (int)wstr.size(),       // Size of the wide string
+        NULL,                   // Output buffer (NULL to get size)
+        0,                      // Output buffer size (0 to get size)
+        &fallback,              // Default character for unconvertible characters
+        &used_default_char      // Flag to indicate if a default char was used
+    );
+
+    if (size_needed == 0) {
+        // Handle error, for example if the wide string is invalid
+        return std::string();
+    }
+
+    // Create a string with the calculated size
+    std::string str(size_needed, 0);
+
+    // Perform the actual conversion
+    WideCharToMultiByte(
+        CP_ACP,                 // Code page
+        0,                      // Flags
+        wstr.c_str(),           // Wide string
+        (int)wstr.size(),       // Wide string size
+        &str[0],                // Output buffer
+        size_needed,            // Output buffer size
+        &fallback,              // Default character
+        &used_default_char      // Flag
+    );
+
+    return str;
+}
+
+std::wstring toWString(const std::string& mb_string) {
+    if (mb_string.empty()) {
+        return std::wstring();
+    }
+
+    int size_needed = MultiByteToWideChar(CP_ACP, 0, mb_string.c_str(), (int)mb_string.size(), NULL, 0);
+    std::wstring wstrTo(size_needed, 0);
+    MultiByteToWideChar(CP_ACP, 0, mb_string.c_str(), (int)mb_string.size(), &wstrTo[0], size_needed);
+    return wstrTo;
+}
+
+void CleanWideFile(const std::wstring& orgName) {
+    string sPath = toString(orgName);
+    wstring newName = toWString(sPath);
+    if (newName != orgName) {
+        std::wcout << L"Wto8 from:" << orgName << L" to " << newName << std::endl;
+        if (! dryRun) {
+            if (_wrename(orgName.c_str(), newName.c_str()) == 0) {
+            } else {
+                // You can check errno for a more specific error code.
+                // For example, EACCES (permission denied), ENOENT (file not found).
+                perror("Error renaming file");
+            }
+        }
+    } else if (verbose) {
+        std::wcout << L"Wto8 file:" << orgName << std::endl;
+    }
+}
+
+// Predicate to check if a wide character is non-ASCII
+// A character is ASCII if its value is in the range [0, 127]
+bool is_not_ascii(wchar_t c) {
+    return static_cast<unsigned int>( c ) > 127;
+}
+
+#endif
 
 // ---------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
@@ -541,6 +635,10 @@ int main(int argc, char* argv[]) {
                             smartQuote = true;
                         }
                         break;
+                    case 'w': // Wide to utf-8 (multi-byte)
+                        wideTo8 = true;
+                        break;
+
                     case '1':   // old to new
                         invert = false;
                         break;
@@ -574,7 +672,7 @@ int main(int argc, char* argv[]) {
             if (smartQuote) std::cout << "Smart Quotes\n";
             if (force) std::cout << "Force delete\n";
             if (doDirectories) std::cout << "Do directories\n";
-            if (dirscan.recurse) std:cout << "Recurse\n";
+            if (dirscan.recurse) std::cout << "Recurse\n";
             if (casefold != '-') std::cout << "CaseFold=" << casefold << std::endl;
             
             std::cout << "Parts=" <<  parts << std::endl;
@@ -593,6 +691,86 @@ int main(int argc, char* argv[]) {
             std::cout << "--- End Settings ---\n";
         }
         
+#ifdef HAVE_WIN
+        if (wideTo8) {
+            // Set the console mode to Unicode (UTF-16) to allow wcout to work correctly.
+            _setmode(_fileno(stdout), _O_U16TEXT);
+
+            // https://developercommunity.visualstudio.com/t/long-paths-crash-filesystem::recursive_d/10120391?q=relative+paths+modules
+            wstring longPathPrefix = L"\\\\?\\";
+            int maxLen = 255;  // actual normal MAX_PATH is 260
+            struct _stat64 statInfo;
+
+            if (parser.patternErrCnt == 0 && parser.optionErrCnt == 0) {
+                for (auto const& filePath : extraDirList) {
+                    wstring wFilePath = toWString(filePath);
+#if 0
+                    DirUtil::getWideFiles(wFilePath, CleanWideFile);
+#else              
+                    try {
+                        wstring wFilePath = toWString(/* longPathPrefix + */ filePath);
+                        std::filesystem::path fs_path(wFilePath);
+                        for (const auto& entry : std::filesystem::recursive_directory_iterator(fs_path, std::filesystem::directory_options::skip_permission_denied)) {
+                            if (entry.is_regular_file()) {
+                                wstring orgName = (entry.path().c_str());
+
+                                string sPath = toString(orgName);
+                                wstring newName = toWString(sPath);
+                                int posLastSlash = sPath.find_last_of("\\") + 1;
+                                if (newName.length() > maxLen) {
+                                    newName.erase(std::remove_if(newName.begin()+ posLastSlash, newName.end(), iswspace), newName.end());
+                                }
+                                if (newName.length() > maxLen) {
+                                    newName.erase(std::remove_if(newName.begin()+ posLastSlash, newName.end(), is_not_ascii), newName.end());
+                                }
+                                if (newName.length() > maxLen) {
+                                    newName.erase(posLastSlash + 20, maxLen - newName.length());
+                                }
+                                if (newName != orgName) {
+                                    std::wcout << L"Wto8 from:" << orgName << L" to " << newName << std::endl;
+                                    if (! dryRun) {
+
+                                        if (_wrename(orgName.c_str(), newName.c_str()) != 0) {
+                                            int err = errno;
+                                            int len = orgName.length();
+                                            if (err == 2 && len > maxLen) {
+                                                wstring rawOrgName = longPathPrefix + orgName;
+                                                wstring rawNewName = longPathPrefix + newName;
+
+                                                if (_wstat64(rawOrgName.c_str(), &statInfo) != 0) {
+                                                    std::wcerr << L"Unable to locate file:" << rawOrgName << std::endl;
+                                                }
+                                          
+                                                err = 0;
+                                                // err = _wrename(rawOrgName.c_str(), rawNewName.c_str());
+                                                if (! MoveFileExW(rawOrgName.c_str(), rawNewName.c_str(), MOVEFILE_REPLACE_EXISTING))
+                                                    err = GetLastError();
+                                            }
+                                            if (err != 0) {
+                                                // You can check errno for a more specific error code.
+                                                // For example, EACCES (permission denied), ENOENT (file not found).
+                                                perror("Error renaming file");
+                                                wcerr << L"ErrorCode=" << errno << L" path length=" << len << std::endl;
+                                                err++;
+                                            }
+                                        }
+                                    }
+                                } else if (verbose) {
+                                    std::wcout << L"Wto8 file:" << orgName << std::endl;
+                                }
+                            }
+                        }
+                    } catch (const std::filesystem::filesystem_error& e) {
+                        // Handle potential errors, such as permission denied
+                        std::wcerr << L"Filesystem error: " << e.what() << std::endl;
+                    }
+#endif
+                }
+            }
+            return 0;
+        }
+#endif
+
         if (parser.patternErrCnt == 0 && parser.optionErrCnt == 0) {
             for (auto const& filePath : extraDirList)  {
                 dirscan.FindFiles(filePath, 0);

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments> -sub="/([^2]+)2000(.*)/2000-$1-$2/" -sub=/_/-/ -sub=/--/-/  -no -ver  *</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-wide j:\mac-intel</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerWorkingDirectory>$(ProjectDir)\..\test\numbers</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)\..\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommandArguments> -sub="/([^2]+)2000(.*)/2000-$1-$2/" -sub=/_/-/ -sub=/--/-/  -no -ver  *</LocalDebuggerCommandArguments>

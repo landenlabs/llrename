@@ -50,6 +50,7 @@
 #define byte win_byte_override  // Fix for c++ v17
 #include <windows.h>
 #undef byte                     // Fix for c++ v17
+#include <functional>
 #else
     typedef unsigned int  DWORD;
     typedef struct dirent Dirent;
@@ -176,4 +177,8 @@ inline const lstring& join(lstring& outPath, const char* inDir, const char* inNa
 inline const lstring& join(lstring& outPath, lstring& inDir, const char* inName) {
      return ReplaceAll(( outPath = inDir + Directory_files::SLASH + inName ), Directory_files::SLASH2, Directory_files::SLASH);
  }
+
+#ifdef  HAVE_WIN
+void getWideFiles(const std::wstring& path, std::function<void(const std::wstring&)> callback);
+#endif
 }
