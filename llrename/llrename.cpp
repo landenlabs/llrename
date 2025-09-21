@@ -49,6 +49,7 @@
 #include <iomanip>
 #include <vector>
 #include <map>
+#include <unordered_set>  
 #include <algorithm>
 #include <regex>
 #include <exception>
@@ -66,6 +67,7 @@ using namespace std;
 
 #include <codecvt>
 #include <locale>
+
 // C++ 17
 #include <filesystem>
 #include <io.h>
@@ -244,10 +246,16 @@ static void renameFromStream(istream& inStream) {
 static const char shiftSet[] = "013456789ABCDEFGHJKLMNOPQRSTUVWXYZabcdefhijklmnopqrstuvwxyz+-[]_"; // 64 = power of 2
 static const unsigned shiftLen = sizeof(shiftSet)-1;
 
+// static set<string> shiftedNames;
+
 static void shiftAlphaNumeric(string& outPath, unsigned shiftBy) {
     assert (shiftBy < shiftLen);
     assert (shiftBy != 0);
     assert (shiftLen == 64);  // xor requires power of 2.
+
+    // if (shiftedNames.contains(outPath))     // Avoid processing shifted names (not a perfect solution)
+    //    return;
+
     int idx = (int)outPath.length();
     while (--idx >= 0) {
         const char* ptr = strchr(shiftSet, outPath[idx]);
@@ -256,6 +264,8 @@ static void shiftAlphaNumeric(string& outPath, unsigned shiftBy) {
             outPath[idx] = shiftSet[(pos ^ shiftBy) % shiftLen];
         }
     }
+
+    // shiftedNames.insert(outPath);
 }
 
 // ---------------------------------------------------------------------------
@@ -279,7 +289,10 @@ static const lstring& getPartRename(lstring& outPath, const lstring& dir, lstrin
    
     return outPath;
 }
-    
+
+static std::unordered_set<size_t> NEW_FILES;
+static std::hash<std::string> HASH_STR;
+
 // ---------------------------------------------------------------------------
 // Open, read and parse file.
 static bool doRename(const lstring& filepath, const lstring& filename) {
@@ -315,9 +328,17 @@ static bool doRename(const lstring& filepath, const lstring& filename) {
     if (verbose && !dryRun) {
         std::cout << "Rename from=" << filepath << " to=" << newFile << std::endl;
     }
-    bool okay = (filepath != newFile) && doRenameA(filepath, newFile);
-    if (okay)
-       num++;
+
+    // Hash and NEW_FILES tries to avoid circular rename where AAAA -> 1111 and 1111 -> AAAA
+    // This condition can occur when doing recursive and * directory scans. 
+    size_t hashfilepath = HASH_STR(filepath);
+    size_t hashNewFile = HASH_STR(newFile);
+
+    bool okay = (filepath != newFile && NEW_FILES.count(hashfilepath) == 0) && doRenameA(filepath, newFile);
+    if (okay) {
+        num++;
+        NEW_FILES.insert(hashNewFile);
+    }
     
     return okay;
 }
@@ -716,7 +737,7 @@ int main(int argc, char* argv[]) {
 
                                 string sPath = toString(orgName);
                                 wstring newName = toWString(sPath);
-                                int posLastSlash = sPath.find_last_of("\\") + 1;
+                                size_t posLastSlash = sPath.find_last_of("\\") + 1;
                                 if (newName.length() > maxLen) {
                                     newName.erase(std::remove_if(newName.begin()+ posLastSlash, newName.end(), iswspace), newName.end());
                                 }
@@ -732,7 +753,7 @@ int main(int argc, char* argv[]) {
 
                                         if (_wrename(orgName.c_str(), newName.c_str()) != 0) {
                                             int err = errno;
-                                            int len = orgName.length();
+                                            int len = (int)orgName.length();
                                             if (err == 2 && len > maxLen) {
                                                 wstring rawOrgName = longPathPrefix + orgName;
                                                 wstring rawNewName = longPathPrefix + newName;
