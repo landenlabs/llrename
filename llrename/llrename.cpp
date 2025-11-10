@@ -81,7 +81,7 @@ const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
 #define stricmp strcasecmp
 #endif
 
-#define VERSION  "v2.9"
+#define VERSION  "v2.10"
 
 // Helper types
 typedef unsigned int uint;
@@ -195,7 +195,8 @@ static bool doRenameB(const char* oldName, const char* newName) {
     
 
     if (verbose || code != 0) {
-        Colors::showError(errMsg, action, oldName, " to ", newName);
+        unsigned strOffset = fullPath ? 0 : CWD_LEN;
+        Colors::showError(errMsg, action, oldName + strOffset, "\n     to ", newName + strOffset);
     }
 
     return (code == 0);
