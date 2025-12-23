@@ -4,6 +4,7 @@
     <LocalDebuggerCommandArguments>-wide j:\mac-intel</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)\..\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerCommandArgumentsHistory>-wide j:\mac-intel|</LocalDebuggerCommandArgumentsHistory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommandArguments> -sub="/([^2]+)2000(.*)/2000-$1-$2/" -sub=/_/-/ -sub=/--/-/  -no -ver  *</LocalDebuggerCommandArguments>

@@ -81,7 +81,7 @@ const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
 #define stricmp strcasecmp
 #endif
 
-#define VERSION  "v2.10"
+#define VERSION  "v2.12"
 
 // Helper types
 typedef unsigned int uint;
@@ -574,10 +574,12 @@ int main(int argc, char* argv[]) {
                             logEndl = ParseUtil::convertSpecialChar(value);
                         }
                         break;
-                    case 'm':   // -modify=nn
-                        if (parser.validOption("modify", cmdName)) {
+                    case 'm':   // -modify=nn  Must enter full "modify" 
+                        if (strcmp("modify", cmdName) == 0) {   
                             char* endStr;
                             modifyNum = (unsigned)std::strtol(value, &endStr, 10);
+                        } else {
+                            std::cerr << "To use modify, provide full name in switch, as -modify\n";
                         }
                         break;
                     case 'p':   // -parts="<format/sector>"
@@ -644,7 +646,11 @@ int main(int argc, char* argv[]) {
                         }
                         break;
                     case 'm':   // modify
-                        modifyNum = 13;
+                        if (strcmp("modify", cmdName) == 0) {
+                            modifyNum = 13;
+                        } else {
+                            std::cerr << "To use modify, provide full name in switch, as -modify\n";
+                        }
                         break;
                     case 'r':   // -recurse
                         dirscan.recurse = true;
