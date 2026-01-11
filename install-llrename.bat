@@ -21,7 +21,7 @@ rmdir /s %prog%\x64
 
 @echo.
 @echo Build release target
-"%msbuild%" %prog%.sln -p:Configuration="Release";Platform=x64 -verbosity:minimal  -detailedSummary:True 
+"%msbuild%" %prog%.sln -m -p:Configuration="Release";Platform=x64 -verbosity:minimal  -detailedSummary:True 
 cd ..
 
 @echo.
