@@ -195,7 +195,7 @@ static bool doRenameB(const char* oldName, const char* newName) {
     
 
     if (verbose || code != 0) {
-        unsigned strOffset = fullPath ? 0 : CWD_LEN;
+        unsigned strOffset = (fullPath || strncasecmp(oldName, CWD_BUF, CWD_LEN) !=0) ? 0 :  CWD_LEN;
         Colors::showError(errMsg, action, oldName + strOffset, "\n     to ", newName + strOffset);
     }
 
@@ -314,7 +314,7 @@ static bool doRename(const lstring& filepath, const lstring& filename) {
     getPartRename(newFile, dirWithSlash, tmpFile, num, modifyNum);
 
     if (outListPath.size() > 0 && outListStream.good()) {
-        unsigned strOffset = fullPath ? 0 : CWD_LEN;
+        unsigned strOffset = (fullPath || strncasecmp(dirWithSlash, CWD_BUF, CWD_LEN) !=0) ? 0 : CWD_LEN;
         lstring qOldFile = quote((dirWithSlash + filename) + strOffset, 0);
         lstring qNewFile = quote(newFile + strOffset, 0);
         if (invert)
