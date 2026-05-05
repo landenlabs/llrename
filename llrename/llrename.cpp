@@ -11,7 +11,7 @@
 //
 // ----- License ----
 //
-// Copyright (c) 2024 Dennis Lang
+// Copyright (c) 2026 Dennis Lang
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +81,7 @@ const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
 #define stricmp strcasecmp
 #endif
 
-#define VERSION "v6.05.01"
+#define VERSION "v6.05.04"
 
 // Helper types
 typedef unsigned int uint;
