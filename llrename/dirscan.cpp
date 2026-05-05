@@ -113,10 +113,10 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
             if ((maxDepth == 0 || depth < maxDepth)
                     && ! FileMatches(fullname, excludeDirPatList, false)
                     && FileMatches(fullname, includeDirPatList, true)) {
-                parseDir(fullname, true);
                 if (recurse) {
                     fileCount += FindFiles(fullname, depth + 1);
                 }
+                parseDir(fullname, false);
             }
         } else if (fullname.length() > 0) {
             fileCount += FindFile(fullname);
