@@ -81,7 +81,11 @@ const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
 #define stricmp strcasecmp
 #endif
 
+<<<<<<< Updated upstream
 #define VERSION "v6.05.05"
+=======
+#define VERSION "v6.05.10"
+>>>>>>> Stashed changes
 
 // Helper types
 typedef unsigned int uint;
