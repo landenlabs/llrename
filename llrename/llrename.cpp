@@ -1,12 +1,12 @@
 //-------------------------------------------------------------------------------------------------
 //
-//  llrename      Nov-2024       Dennis Lang
+//  llrename      Nov-2026       Dennis Lang
 //
 //  Rename files
 //
 //-------------------------------------------------------------------------------------------------
 //
-// Author: Dennis Lang - 2024
+// Author: Dennis Lang - 2026
 // https://landenlabs.com/
 //
 // ----- License ----
@@ -82,7 +82,7 @@ const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
 #endif
 
  
-#define VERSION "v6.05.05"
+#define VERSION "v6.05.25"
  
 
 // Helper types
