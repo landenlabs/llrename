@@ -40,6 +40,7 @@
 #include "dirscan.hpp"
 #include "directory.hpp"
 #include "parseutil.hpp"
+#include "widefiles.hpp"
 
 #include <stdio.h>
 #include <ctype.h>
