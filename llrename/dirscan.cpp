@@ -86,14 +86,6 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
                 fileCount += FindFile(dirname);
                 return fileCount;
             } else if (S_ISDIR(filestat.st_mode)) {
-                // Check the actual top-level directory argument against the exclude/include
-                // patterns here - fullname is still unassigned at this point (only set once
-                // the scan loop below starts), so checking it here always vacuously passed,
-                // meaning -ExcludePath/-IncludePath never applied to the directory named
-                // directly on the command line, only to nested subdirectories found below.
-                // A nested subdirectory that fails this same check (further down) is never
-                // recursed into or scanned at all - match that here by returning outright
-                // instead of only skipping the isDir/parseDir treatment.
                 if ((maxDepth == 0 || depth < maxDepth)
                         && ! FileMatches(dirname, excludeDirPatList, false)
                         && FileMatches(dirname, includeDirPatList, true)) {

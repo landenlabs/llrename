@@ -168,11 +168,6 @@ static void doChdir(const char* dir) {
 
 // ---------------------------------------------------------------------------
 static int doRenameC(const char* oldName, const char* newName) {
-    // stricmp()==0 used to be the "is this just a case-only rename" check, but that's
-    // wrong on case-sensitive filesystems (Linux): two genuinely different files whose
-    // names differ only by case would stricmp-match and skip the existence check below,
-    // letting rename() silently clobber the unrelated newName. isSameFile() checks actual
-    // file identity (inode/volume+file-id), which is correct on every platform.
     if (DirUtil::isSameFile(oldName, newName) || !DirUtil::fileExists(newName)) {
         return (dryRun) ? 0 : rename(oldName, newName);
     } else {
@@ -193,10 +188,7 @@ static bool doRenameB(const char* oldName, const char* newName) {
     size_t dirLen = 0;
     
     if (dir1 == dir2) {
-        // Only delete an existing newName if it's a genuinely different file. On a
-        // case-insensitive filesystem, a pure case-fold rename (-c/-C) makes fileExists(newName)
-        // true for oldName ITSELF - deleting it here would destroy the source file, then the
-        // rename below would fail (ENOENT) since there'd be nothing left to rename.
+        // Only delete an existing newName if it's a genuinely different file.
         if (force && DirUtil::fileExists(newName) && !DirUtil::isSameFile(oldName, newName)) {
             DirUtil::deleteFile(dryRun, newName);
         }
