@@ -84,7 +84,7 @@ const size_t MAX_PATH = PATH_MAX;
 #endif
 
  
-#define VERSION "v6.05.25"
+#define VERSION "v6.07.10"
  
 
 // Helper types

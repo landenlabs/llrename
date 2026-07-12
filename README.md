@@ -1,8 +1,8 @@
 ﻿<table border="0">
   <tr>
     <td>
-      <!-- VERSION -->v6.05.25<br>
-      <!-- DATE -->24-May-2026<br>
+      <!-- VERSION -->v6.07.10<br>
+      <!-- DATE -->12-Jul-2026<br>
       Win & MacOS<br>
       <a href="https://landenlabs.com">Home</a>
     </td>
@@ -32,7 +32,7 @@ that can scan directories and rename files, include case change and numbering.
 
 ### Help Banner:
 <pre>
-llrename  Dennis Lang <!-- VERSION -->v6.05.25<!-- DATE -->24-May-2026
+llrename  Dennis Lang <!-- VERSION -->v6.07.10<!-- DATE -->12-Jul-2026
 
 
 Des: Rename file names
