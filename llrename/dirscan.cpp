@@ -86,22 +86,30 @@ size_t Dirscan::FindFiles(const lstring& dirname, unsigned depth) {
                 fileCount += FindFile(dirname);
                 return fileCount;
             } else if (S_ISDIR(filestat.st_mode)) {
+                // Check the actual top-level directory argument against the exclude/include
+                // patterns here - fullname is still unassigned at this point (only set once
+                // the scan loop below starts), so checking it here always vacuously passed,
+                // meaning -ExcludePath/-IncludePath never applied to the directory named
+                // directly on the command line, only to nested subdirectories found below.
+                // A nested subdirectory that fails this same check (further down) is never
+                // recursed into or scanned at all - match that here by returning outright
+                // instead of only skipping the isDir/parseDir treatment.
                 if ((maxDepth == 0 || depth < maxDepth)
-                        && ! FileMatches(fullname, excludeDirPatList, false)
-                        && FileMatches(fullname, includeDirPatList, true)) {
+                        && ! FileMatches(dirname, excludeDirPatList, false)
+                        && FileMatches(dirname, includeDirPatList, true)) {
                     isDir = true;
                     parseDir(dirname, true);
+                } else {
+                    return fileCount;
                 }
             }
-        } else {
-#ifdef HAVE_WIN
-#else
-            char CWD_BUF[256];
-            getcwd(CWD_BUF, sizeof(CWD_BUF));
-            std::cerr << "Unable to scan directory:" << CWD_BUF << " " << dirname << std::endl;
-            return 0;
-#endif
         }
+        // else: stat() failed - dirname is likely a wildcard pattern (e.g. "Foo*.png").
+        // Directory_files's constructor (above) already stripped the wildcard and opened
+        // the base directory, so fall through to the scan loop below on every platform
+        // instead of bailing out here - previously only the (empty) HAVE_WIN branch did
+        // this correctly; the non-Windows branch printed an error and returned early,
+        // breaking wildcard positional directory arguments on macOS/Linux entirely.
     }  catch (exception ex)  {
         // Probably a pattern, let directory scan do its magic.
         cerr << ex.what() << std::endl;

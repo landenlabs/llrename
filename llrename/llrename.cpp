@@ -78,7 +78,8 @@ using namespace std;
 #define getcwd _getcwd
 #define stricmp _stricmp
 #else
-const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
+#include <climits>   // PATH_MAX - portable across macOS and Linux, unlike the Apple-only __DARWIN_MAXPATHLEN
+const size_t MAX_PATH = PATH_MAX;
 #define stricmp strcasecmp
 #endif
 
@@ -135,9 +136,17 @@ static const char* quote(const lstring& path, unsigned rootDirLen) {
         return path + rootDirLen;
     }
 
+    const char* srcPath = path + rootDirLen;
+    size_t srcLen = path.length() - rootDirLen;
+    // Need room for: opening quote + srcLen chars + closing quote + nul terminator.
+    if (srcLen > sizeof(QUOTE_BUF) - 3) {
+        Colors::showError("Path too long to quote, truncating:", srcPath);
+        srcLen = sizeof(QUOTE_BUF) - 3;
+    }
     QUOTE_BUF[0] = '"';
-    strcpy(QUOTE_BUF + 1, path + rootDirLen);
-    strcpy(QUOTE_BUF + 1 + path.length() - rootDirLen, "\"");
+    memcpy(QUOTE_BUF + 1, srcPath, srcLen);
+    QUOTE_BUF[1 + srcLen] = '"';
+    QUOTE_BUF[2 + srcLen] = '\0';
     return QUOTE_BUF;
 }
 
@@ -159,7 +168,12 @@ static void doChdir(const char* dir) {
 
 // ---------------------------------------------------------------------------
 static int doRenameC(const char* oldName, const char* newName) {
-    if (stricmp(oldName, newName) == 0 || !DirUtil::fileExists(newName)) {
+    // stricmp()==0 used to be the "is this just a case-only rename" check, but that's
+    // wrong on case-sensitive filesystems (Linux): two genuinely different files whose
+    // names differ only by case would stricmp-match and skip the existence check below,
+    // letting rename() silently clobber the unrelated newName. isSameFile() checks actual
+    // file identity (inode/volume+file-id), which is correct on every platform.
+    if (DirUtil::isSameFile(oldName, newName) || !DirUtil::fileExists(newName)) {
         return (dryRun) ? 0 : rename(oldName, newName);
     } else {
          Colors::showError("New file already exists:", newName);
@@ -179,7 +193,11 @@ static bool doRenameB(const char* oldName, const char* newName) {
     size_t dirLen = 0;
     
     if (dir1 == dir2) {
-        if (force && DirUtil::fileExists(newName)) {
+        // Only delete an existing newName if it's a genuinely different file. On a
+        // case-insensitive filesystem, a pure case-fold rename (-c/-C) makes fileExists(newName)
+        // true for oldName ITSELF - deleting it here would destroy the source file, then the
+        // rename below would fail (ENOENT) since there'd be nothing left to rename.
+        if (force && DirUtil::fileExists(newName) && !DirUtil::isSameFile(oldName, newName)) {
             DirUtil::deleteFile(dryRun, newName);
         }
 #ifdef HAVE_WIN
@@ -211,8 +229,11 @@ static bool doRenameA(const char* oldName, const char* newName) {
 }
 
 // ---------------------------------------------------------------------------
+// Only strip quotes that are actually there - quote() only wraps a field in "..."
+// when it contains a space (or always, without -smartQuote), so an unquoted field
+// must be left untouched rather than have its first/last character chopped off.
 static void removeQuote(lstring& word) {
-    if (word.length() > 1) {
+    if (word.length() > 1 && word.front() == '"' && word.back() == '"') {
         word = word.substr(1, word.length() - 2);
     }
 }
@@ -221,15 +242,18 @@ static void removeQuote(lstring& word) {
 static void renameFromStream(istream& inStream) {
     string line;
     while (std::getline(inStream, line)) {
-        size_t divider = line.find("\",\"");
+        // Split on the ACTUAL configured logSep, not a hardcoded comma - a -logSep
+        // without a comma would otherwise never match, silently no-op'ing every line
+        // (divider stayed npos, file1/file2 both became a copy of the whole line, and
+        // "skip identical names" below then skipped every single line).
+        size_t divider = line.find(logSep);
         if (divider == string::npos) {
-            divider = line.find(',');
-        } else {
-            divider++;  // skip over trailing quote
+            Colors::showError("Skipping malformed line (no separator found):", line.c_str());
+            continue;
         }
 
         lstring file1 = line.substr(0, divider);
-        lstring file2 = line.substr(divider + 1);
+        lstring file2 = line.substr(divider + logSep.length());
         removeQuote(file1);
         removeQuote(file2);
 
@@ -286,7 +310,11 @@ static const lstring& getPartRename(lstring& outPath, const lstring& dir, lstrin
     } else {
         lstring extn;
         DirUtil::getExt(extn, name);
-        tmpName.resize(name.length() - extn.length() - 1);
+        // Only strip a trailing ".ext" (extn + the dot) when an extension actually exists -
+        // extensionless files (extn empty) have no dot to remove, and previously lost their
+        // last character here regardless.
+        size_t dotLen = extn.empty() ? 0 : 1;
+        tmpName.resize(name.length() - extn.length() - dotLen);
         lstring part;
         outPath += ParseUtil::getParts(part, parts, tmpName.c_str(), extn, num);
     }
