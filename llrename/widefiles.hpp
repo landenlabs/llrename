@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Dennis Lang
+//
 //-------------------------------------------------------------------------------------------------
 // File: widefiles.hpp  Author: Dennis Lang  Desc: Windows wide-char (UTF-16) directory walk
 //
