@@ -17,7 +17,8 @@
 # llrename
 ### Rename files
 
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.txt)
+[![Build status](https://github.com/landenlabs/llrename/actions/workflows/build.yml/badge.svg)](https://github.com/landenlabs/llrename/actions/workflows/build.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](llcommon/LICENSE)
 ![Language](https://img.shields.io/badge/language-C%2B%2B17-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey.svg)
 
@@ -58,6 +59,9 @@ Use: llrename [options] directories...   or  files
    -no                          ; No rename, dry run
    -force                       ; Deleted target if same name
    -recurse                     ; Recurse into directories
+   -wide                        ; Wide char to utf-8
+
+   -modify[=code]               ; Modify name (code=1..n &lt; 64))
 
    -toList=&lt;write_fileName>     ; Output List of 'old','new'
    -fromList=&lt;read_fileName>    ; Read List rename pair per line
@@ -70,7 +74,7 @@ Use: llrename [options] directories...   or  files
    -logSep=", "               ; Log separator string, def=", "
    -logEnd="\n"              ; Log end of line, def="\n"
 
- FileParts:
+ Options for -parts  (default=N.E)
      N=name, E=extension, #=number (note uppercase N and E)
      N-#.E
      N_####.E
@@ -81,8 +85,8 @@ Use: llrename [options] directories...   or  files
    -verbose                     ; Only dump parsed json
 
  Example:
-  llrename -c -r -sub="/ /_/" -inc=*.png -exc=foo.png dir1 dir2
-  llrename -C -r -start=1000 -part="N_####.E" -inc=*.jpg dir1 Foo*.png Bar*.jpg
+  llrename -c -r -sub="/ /_/" -inc=\*.png -exc=foo.png dir1 dir2
+  llrename -C -r -start=1000 -part="N_####.E" -inc=\*.jpg -inc=\*.png dir1 Foo*.png Bar*.jpg
   llrename -sub="/([^_]+)_([.*])/$2-$1/" dir1
  Warning with regular expression:
    Remember to escape special characters, such as ., ( and [
@@ -111,6 +115,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-See [LICENSE.txt](LICENSE.txt) for the full license text.
+See [llcommon/LICENSE](llcommon/LICENSE) for the full license text.
 
 [Top](#top)

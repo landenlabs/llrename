@@ -558,6 +558,10 @@ int main(int argc, char* argv[]) {
         bool doParseCmds = true;
         string endCmds = "--";
         for (int argn = 1; argn < argc; argn++) {
+            if (doParseCmds && endCmds == argv[argn]) {
+                doParseCmds = false;    // "--" ends options, remaining args are files/dirs
+                continue;
+            }
             if (*argv[argn] == '-' && doParseCmds) {
                 lstring argStr(argv[argn]);
                 Split cmdValue(argStr, "=", 2);
@@ -704,10 +708,6 @@ int main(int argc, char* argv[]) {
                         return 0;
                     default:
                         parser.showUnknown(argStr);
-                    }
-
-                    if (endCmds == argv[argn]) {
-                        doParseCmds = false;
                     }
                 }
             } else {
